@@ -147,6 +147,18 @@ El sistema propone el mínimo en lugar de que el usuario lo tipee a mano.
 
 ---
 
+## Plataforma de Despliegue
+
+| Componente | Plataforma | Detalle |
+|---|---|---|
+| Backend | Render (Web Service con Docker) | Despliegue del contenedor Spring Boot; variables de entorno para credenciales de base de datos y JWT secret. |
+| Frontend | Vercel | Build automático de la app React/Vite en cada push a `main`; dominio HTTPS gratuito. |
+| Base de datos | Railway (MySQL) | Instancia MySQL gestionada, conectada al backend vía variables de entorno. |
+
+CORS se habilita en Spring Security para aceptar el dominio del frontend desplegado en Vercel. Con el free tier de Render, el backend puede tardar unos segundos en responder tras un período de inactividad (cold start).
+
+---
+
 ## Estrategia de testing
 
 La lógica analítica (punto de reposición, rotación, clasificación ABC) es la parte del sistema con mayor riesgo de errores silenciosos, así que concentra la mayor parte del esfuerzo de testing.
@@ -225,6 +237,11 @@ npm run dev
 ```
 
 El backend queda disponible en `http://localhost:8080` y el frontend en `http://localhost:5173`.
+
+### Entornos desplegados
+
+- Frontend: `[Completar URL de Vercel]`
+- Backend: `[Completar URL de Render]`
 
 ---
 
