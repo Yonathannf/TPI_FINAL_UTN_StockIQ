@@ -10,12 +10,12 @@ Repositorio correspondiente al Trabajo Práctico Final de la **Tecnicatura Unive
 
 ## Integrantes
 
-- **[Completar]**
-- **[Completar]**
+- **Jennifer Franco**
+- **Jonathan Franco**
 
 ## Tutor/a
 
-**[Completar]**
+**Sofia Raia**
 
 ---
 
@@ -247,4 +247,4 @@ El backend queda disponible en `http://localhost:8080` y el frontend en `http://
 
 ## Enlace al repositorio
 
-[Completar antes de la entrega]
+https://github.com/Yonathannf/TPI_FINAL_UTN_StockIQ.git
