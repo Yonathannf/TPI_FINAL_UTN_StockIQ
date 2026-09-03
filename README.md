@@ -138,7 +138,7 @@ El sistema propone el mínimo en lugar de que el usuario lo tipee a mano.
 |---|---|
 | Backend | Spring Boot (Java 17), arquitectura en capas Controller → Service → Repository, DTOs y mappers. |
 | Persistencia | Spring Data JPA + Hibernate. |
-| Base de datos | MySQL para producción/entrega; H2 en memoria como perfil de desarrollo. |
+| Base de datos | MySQL  |
 | Seguridad | Spring Security, autenticación basada en roles (encargado, operario), tokens JWT. |
 | Frontend | React.js con Vite, consumiendo la API REST del backend. |
 | Build y dependencias | Maven, con Lombok para reducir boilerplate en entidades y DTOs. |
