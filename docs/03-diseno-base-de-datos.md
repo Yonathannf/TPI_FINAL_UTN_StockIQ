@@ -1,6 +1,6 @@
 # StockIQ — Diseño de la base de datos
 
-Motor: **MySQL 8.0.16+**, InnoDB, charset `utf8mb4`. El script completo está en `backend/src/main/resources/db/migration/V1__esquema_inicial.sql` y se ejecuta con Flyway al iniciar el backend.
+Motor: **MySQL 8.0.16+**, InnoDB, charset `utf8mb4`. El esquema se versiona en dos migraciones de Flyway: `V1__esquema_inicial.sql` (esquema base) y `V2__ajustes_cierre_analisis.sql` (columnas agregadas al cerrar los puntos abiertos de la segunda entrega).
 
 ## 1. Decisiones de diseño
 
@@ -20,6 +20,11 @@ Motor: **MySQL 8.0.16+**, InnoDB, charset `utf8mb4`. El script completo está en
 | D-12 | En el ABC, la clase se asigna según el porcentaje acumulado previo al producto, por lo que el producto que cruza un corte queda en la clase superior. | Es el criterio habitual del análisis de Pareto, garantiza que el producto de mayor valor sea siempre clase A y cumple RN-28 (con un solo producto con consumo, este es clase A). |
 | D-13 | Al registrar una salida o transferencia, el Service bloquea la fila del producto (`SELECT ... FOR UPDATE`, `@Lock(PESSIMISTIC_WRITE)` en JPA) dentro de la transacción, antes de validar el stock. Al confirmar o cancelar, bloquea la fila de la transferencia. | Como el stock se deriva, dos operaciones simultáneas podrían validar el mismo stock y dejarlo negativo (RN-06), o resolver dos veces una transferencia (RN-13). El bloqueo las serializa. |
 | D-14 | El esquema se versiona con Flyway (`db/migration/V{n}__descripcion.sql`) y Hibernate se configura con `ddl-auto=validate`. | Los cambios de esquema quedan registrados en el repositorio y Hibernate solo verifica que las entidades coincidan con la base, sin modificarla. |
+| D-15 | No se puede desactivar un depósito con stock distinto de cero o transferencias pendientes (RN-38), ni un producto en la misma situación (RN-39). Se valida en el Service antes del `UPDATE ... SET activo = false`, no con una restricción de la base. | Evita que el stock total disponible (RN-18) subestime mercadería real y que una transferencia quede con un depósito/producto inactivo en uno de sus extremos. No se puede expresar como `CHECK` porque depende de agregar sobre `movimiento`. |
+| D-16 | La fecha de un movimiento la asigna siempre el servidor (`CURRENT_TIMESTAMP`, RN-41); la API no admite que el cliente la indique. | Simplicidad y consistencia de la capa analítica. Los movimientos con fecha pasada que se necesitan para probar rotación y ABC en la etapa 5 se cargan con un script de inserción directa a la base, no a través de la API. Para garantizar que todas las fechas queden en UTC sin importar dónde corra el backend, se configura la JVM en UTC (`-Duser.timezone=UTC`) y Hibernate con `spring.jpa.properties.hibernate.jdbc.time_zone=UTC`; la conversión a hora de Argentina se hace solo al mostrar, filtrar o agrupar por día. |
+| D-17 | La consulta de "stock a una fecha" (RN-36), usada para el stock inicial y final de la rotación, suma todos los depósitos, incluidos los inactivos; en cambio RN-18 (stock disponible hoy, para alertas) suma solo los depósitos activos. | Son preguntas distintas: RN-18 es operativa ("qué tengo disponible ahora"), RN-36 es histórica ("qué había en un momento dado"). Desactivar un depósito hoy no debe cambiar retroactivamente cuánto stock participó del consumo durante un período pasado. |
+| D-18 | `producto.fraccionable` (BOOLEAN) indica si sus movimientos admiten cantidad no entera (RN-44). Se valida en el Service, no con `CHECK`, porque `cantidad` es una columna de `movimiento` y la condición depende de otra tabla (`producto`); MySQL no permite `CHECK` entre tablas. | Un campo explícito es más robusto que inferir la regla del texto libre de `unidad_medida`. |
+| D-19 | `categoria.activo` (BOOLEAN) se agrega para unificar el criterio de baja: las 5 entidades maestras (categoría, proveedor, producto, depósito, usuario) tienen el mismo mecanismo de baja lógica (RN-46). | Antes, categoría era la única entidad maestra sin estado, lo que generaba el criterio inconsistente que señaló la revisión: existía `DELETE` para categoría pero ninguna baja lógica cuando tiene historial. |
 
 ## 2. Normalización
 
@@ -47,6 +52,7 @@ Motor: **MySQL 8.0.16+**, InnoDB, charset `utf8mb4`. El script completo está en
 | id | BIGINT | PK, AUTO_INCREMENT | Identificador. |
 | nombre | VARCHAR(100) | NOT NULL, UNIQUE | Nombre de la categoría. |
 | descripcion | VARCHAR(255) | NULL | Descripción opcional. |
+| activo | BOOLEAN | NOT NULL, DEFAULT TRUE | Baja lógica (RN-45, RN-46). Una categoría inactiva no puede asignarse a productos (RN-43). Agregada en `V2`. |
 
 ### 4.2 `proveedor`
 | Columna | Tipo | Restricciones | Descripción |
@@ -70,7 +76,8 @@ Motor: **MySQL 8.0.16+**, InnoDB, charset `utf8mb4`. El script completo está en
 | unidad_medida | VARCHAR(20) | NOT NULL | Unidad (un, kg, lt...). |
 | precio_referencia | DECIMAL(12,2) | NOT NULL, CHECK >= 0 | Precio para valorizar el consumo (ABC). |
 | stock_seguridad | DECIMAL(12,2) | NOT NULL, DEFAULT 0, CHECK >= 0 | Colchón usado en el punto de reposición. |
-| activo | BOOLEAN | NOT NULL, DEFAULT TRUE | Baja lógica. |
+| fraccionable | BOOLEAN | NOT NULL, DEFAULT TRUE | Si es FALSE, la cantidad de sus movimientos debe ser entera (RN-44); solo puede pasar a FALSE si su stock es entero (RN-47). Agregada en `V2`. |
+| activo | BOOLEAN | NOT NULL, DEFAULT TRUE | Baja lógica; no se puede pasar a FALSE si tiene stock o transferencias pendientes (RN-39). |
 
 ### 4.4 `deposito`
 | Columna | Tipo | Restricciones | Descripción |
@@ -78,7 +85,7 @@ Motor: **MySQL 8.0.16+**, InnoDB, charset `utf8mb4`. El script completo está en
 | id | BIGINT | PK, AUTO_INCREMENT | Identificador. |
 | nombre | VARCHAR(100) | NOT NULL, UNIQUE | Nombre del depósito. |
 | ubicacion | VARCHAR(255) | NULL | Dirección o descripción. |
-| activo | BOOLEAN | NOT NULL, DEFAULT TRUE | Baja lógica. |
+| activo | BOOLEAN | NOT NULL, DEFAULT TRUE | Baja lógica; no se puede pasar a FALSE si tiene stock o transferencias pendientes (RN-38). |
 
 ### 4.5 `usuario`
 | Columna | Tipo | Restricciones | Descripción |
@@ -88,8 +95,8 @@ Motor: **MySQL 8.0.16+**, InnoDB, charset `utf8mb4`. El script completo está en
 | password_hash | VARCHAR(100) | NOT NULL | Hash BCrypt. |
 | nombre | VARCHAR(100) | NOT NULL | Nombre. |
 | apellido | VARCHAR(100) | NOT NULL | Apellido. |
-| rol | ENUM('ENCARGADO','OPERARIO') | NOT NULL | Rol del usuario. |
-| activo | BOOLEAN | NOT NULL, DEFAULT TRUE | Baja lógica. |
+| rol | ENUM('ENCARGADO','OPERARIO') | NOT NULL | Rol del usuario. No se puede cambiar a `OPERARIO` al último `ENCARGADO` activo ni el propio rol (RN-40). |
+| activo | BOOLEAN | NOT NULL, DEFAULT TRUE | Baja lógica; no se puede desactivar al último `ENCARGADO` activo ni un usuario a sí mismo (RN-40). Un usuario inactivo pierde el acceso aunque tenga un token vigente (RF-02). |
 
 ### 4.6 `movimiento`
 | Columna | Tipo | Restricciones | Descripción |
@@ -191,6 +198,19 @@ SELECT id, nombre, valor,
 - La condición `valor = 0` se evalúa primero, lo que además evita dividir por cero cuando ningún producto tuvo consumo.
 - La ventana `ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING` suma solo los productos anteriores (acumulado previo); para el primero es `NULL` y el `COALESCE` lo convierte en 0.
 - Los valores 90, 80 y 95 son de ejemplo; en el Service se leen de la tabla `parametro`.
+
+Ejemplo de validación antes de desactivar un depósito (RN-38) — si devuelve alguna fila, se rechaza la baja con 409:
+
+```sql
+SELECT 1
+  FROM movimiento
+ WHERE (deposito_origen_id = :depositoId OR deposito_destino_id = :depositoId)
+   AND tipo = 'TRANSFERENCIA' AND estado_transferencia = 'PENDIENTE'
+ LIMIT 1;
+-- + comprobar que v_stock_deposito no tenga stock > 0 para ese depósito.
+```
+
+La validación de un producto (RN-39) es análoga, reemplazando el filtro por `producto_id = :productoId` y comprobando también `v_stock_transito`.
 
 ## 7. Datos iniciales
 

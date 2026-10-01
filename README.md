@@ -25,7 +25,7 @@ Repositorio correspondiente al Trabajo Práctico Final de la Tecnicatura Univers
 | 5 | [Diagramas](docs/05-diagramas.md) | DER, casos de uso, secuencia, estados, arquitectura y clases |
 | 6 | [API](docs/06-api-endpoints.md) | Endpoints, roles, requerimientos asociados y formato de errores |
 
-Script de base de datos: [`V1__esquema_inicial.sql`](backend/src/main/resources/db/migration/V1__esquema_inicial.sql)
+Scripts de base de datos (Flyway): [`V1__esquema_inicial.sql`](backend/src/main/resources/db/migration/V1__esquema_inicial.sql) · [`V2__ajustes_cierre_analisis.sql`](backend/src/main/resources/db/migration/V2__ajustes_cierre_analisis.sql)
 
 ---
 
@@ -61,15 +61,15 @@ Desarrollar un sistema web para gestionar el inventario de uno o más depósitos
 
 El modelo se apoya en el registro de movimientos como **fuente única de verdad**: el stock no se guarda como un campo mutable, sino que se deriva de la suma de movimientos. Esto da trazabilidad completa y evita inconsistencias entre lo registrado y lo real. Los movimientos no se editan ni se eliminan; un error se corrige con un movimiento compensatorio.
 
-- **Producto**: código, nombre, categoría, proveedor principal, unidad de medida, precio de referencia, stock de seguridad y estado.
-- **Categoría**: agrupa productos para el análisis de rotación.
+- **Producto**: código, nombre, categoría, proveedor principal, unidad de medida, si admite cantidades fraccionarias, precio de referencia, stock de seguridad y estado.
+- **Categoría**: agrupa productos para el análisis de rotación; tiene estado (activa o inactiva).
 - **Proveedor**: datos de contacto y lead time (tiempo de entrega prometido), usado para calcular el punto de reposición.
 - **Depósito**: nombre, ubicación y estado. Permite calcular el stock por depósito además de a nivel global.
 - **Usuario**: credenciales (contraseña con hash BCrypt), nombre, apellido, rol y estado.
 - **Movimiento**: tipo (entrada, salida o transferencia), producto, cantidad, fecha, motivo, usuario responsable y depósitos de origen y/o destino según el tipo. Las transferencias tienen además estado (pendiente, confirmada o cancelada), fecha y usuario de resolución.
 - **Parámetro**: valores configurables de la capa analítica (ventana de consumo, días de cobertura, período de análisis y cortes ABC).
 
-Productos, proveedores, depósitos y usuarios se dan de baja de forma lógica, para conservar el historial de movimientos.
+Todas las entidades maestras (categorías, proveedores, productos, depósitos y usuarios) se dan de baja de forma lógica, para conservar el historial de movimientos. Las categorías y los proveedores sin productos asociados también pueden eliminarse físicamente.
 
 📄 [Diseño de la base de datos](docs/03-diseno-base-de-datos.md) · [Diagrama Entidad-Relación](docs/05-diagramas.md)
 
@@ -199,7 +199,6 @@ El equipo organiza el desarrollo en sprints quincenales bajo un esquema Kanban, 
 - Ramas de trabajo por feature (`feature/punto-reposicion`, `feature/transferencias`) con integración a `main` vía pull request.
 - Convención de commits (`feat:`, `fix:`, `test:`, `docs:`).
 - Checklist de Definition of Done por issue: código + test unitario + revisión por el otro integrante antes de mergear.
-- Cada entrega queda marcada con un tag (`entrega-1`, `entrega-2`, ...) para conservar una versión fija de lo presentado.
 
 ## Plan de trabajo por etapas
 
@@ -240,7 +239,8 @@ TPI_FINAL_UTN_StockIQ/
 │   │   ├── analitica/
 │   │   └── dashboard/
 │   ├── src/main/resources/db/migration/
-│   │   └── V1__esquema_inicial.sql
+│   │   ├── V1__esquema_inicial.sql
+│   │   └── V2__ajustes_cierre_analisis.sql
 │   ├── src/test/java/...
 │   ├── Dockerfile
 │   └── pom.xml

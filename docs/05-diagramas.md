@@ -18,6 +18,7 @@ erDiagram
         bigint id PK
         varchar nombre UK
         varchar descripcion
+        boolean activo
     }
     PROVEEDOR {
         bigint id PK
@@ -37,6 +38,7 @@ erDiagram
         varchar unidad_medida
         decimal precio_referencia
         decimal stock_seguridad
+        boolean fraccionable
         boolean activo
     }
     DEPOSITO {
@@ -209,6 +211,7 @@ classDiagram
         Long id
         String nombre
         String descripcion
+        boolean activo
     }
     class Proveedor {
         Long id
@@ -226,6 +229,7 @@ classDiagram
         String unidadMedida
         BigDecimal precioReferencia
         BigDecimal stockSeguridad
+        boolean fraccionable
         boolean activo
     }
     class Deposito {

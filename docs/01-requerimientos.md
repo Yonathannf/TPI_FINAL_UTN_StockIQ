@@ -20,17 +20,17 @@ StockIQ es una aplicación web para gestionar el inventario de uno o más depós
 | ID | Requerimiento | Rol |
 |---|---|---|
 | RF-01 | El sistema permite iniciar sesión con usuario y contraseña y devuelve un token JWT. | Todos |
-| RF-02 | El sistema restringe el acceso a cada endpoint y pantalla según el rol. | Todos |
-| RF-03 | El encargado puede crear, editar y desactivar usuarios y asignarles un rol. | ENCARGADO |
+| RF-02 | El sistema restringe el acceso a cada endpoint y pantalla según el rol. Un usuario desactivado pierde el acceso de inmediato, aunque tenga un token vigente. | Todos |
+| RF-03 | El encargado puede crear, editar y desactivar usuarios y asignarles un rol, sin poder dejar el sistema sin ningún `ENCARGADO` activo ni desactivarse o cambiarse el rol a sí mismo (RN-40). | ENCARGADO |
 
 ### 3.2 Catálogo
 | ID | Requerimiento | Rol |
 |---|---|---|
 | RF-04 | ABM de categorías. | ENCARGADO |
 | RF-05 | ABM de proveedores con datos de contacto y lead time en días. | ENCARGADO |
-| RF-06 | ABM de productos: nombre, categoría, proveedor principal, unidad de medida, precio de referencia, stock de seguridad y estado. | ENCARGADO |
+| RF-06 | ABM de productos: nombre, categoría, proveedor principal, unidad de medida, si admite cantidades fraccionarias, precio de referencia, stock de seguridad y estado. | ENCARGADO |
 | RF-07 | ABM de depósitos: nombre y ubicación. | ENCARGADO |
-| RF-08 | Los productos y depósitos se dan de baja de forma lógica (estado), sin borrar el historial. | ENCARGADO |
+| RF-08 | Los productos, depósitos y usuarios se dan de baja solo de forma lógica (estado), sin borrar el historial. Las categorías y los proveedores también tienen baja lógica y, además, pueden eliminarse físicamente si no tienen productos asociados (RN-46). | ENCARGADO |
 
 ### 3.3 Movimientos
 | ID | Requerimiento | Rol |
@@ -39,7 +39,7 @@ StockIQ es una aplicación web para gestionar el inventario de uno o más depós
 | RF-10 | Registrar una salida de un producto desde un depósito origen. | ENCARGADO, OPERARIO |
 | RF-11 | Registrar una transferencia entre dos depósitos; nace en estado PENDIENTE. | ENCARGADO, OPERARIO |
 | RF-12 | Confirmar o cancelar una transferencia pendiente. | ENCARGADO, OPERARIO |
-| RF-13 | Cada movimiento guarda fecha, motivo, cantidad y usuario responsable. | Todos |
+| RF-13 | Cada movimiento guarda fecha (asignada siempre por el servidor, RN-41), motivo, cantidad y usuario responsable. | Todos |
 | RF-14 | Los movimientos no se editan ni se eliminan; una corrección se registra como un movimiento nuevo. | Todos |
 | RF-15 | Consultar el historial de movimientos filtrando por producto, depósito, tipo, usuario y rango de fechas, con resultados paginados. | Todos |
 
@@ -56,7 +56,7 @@ StockIQ es una aplicación web para gestionar el inventario de uno o más depós
 | RF-19 | Generar alertas para los productos cuyo stock total es menor o igual al punto de reposición, con cantidad sugerida a pedir. | ENCARGADO |
 | RF-20 | Calcular la rotación por producto y por categoría para un período dado. | ENCARGADO |
 | RF-21 | Clasificar los productos activos en A, B y C según el valor acumulado de consumo (cortes 80% / 95%). | ENCARGADO |
-| RF-22 | Los parámetros de cálculo (ventana de consumo, cortes ABC, días de cobertura) son configurables. | ENCARGADO |
+| RF-22 | Los parámetros de cálculo (ventana de consumo, período de análisis para rotación y ABC, cortes ABC, días de cobertura) son configurables. | ENCARGADO |
 
 ### 3.6 Dashboard
 | ID | Requerimiento | Rol |
