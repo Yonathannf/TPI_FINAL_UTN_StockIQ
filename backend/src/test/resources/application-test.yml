@@ -1,0 +1,10 @@
+# Perfil de los tests de integración: la base la aporta Testcontainers (@ServiceConnection).
+stockiq:
+  cors:
+    allowed-origins: http://localhost:5173
+  seed:
+    admin-username: test-admin
+    admin-password: test-admin-1234
+  jwt:
+    secret: test-only-secret-test-only-secret-1234567890
+    expiration-minutes: 60

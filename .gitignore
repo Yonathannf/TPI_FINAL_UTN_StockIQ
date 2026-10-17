@@ -1,0 +1,14 @@
+# Build
+target/
+node_modules/
+dist/
+
+# Secretos locales
+.env
+.env.*
+
+# IDEs y sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store
