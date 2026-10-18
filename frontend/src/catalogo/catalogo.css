@@ -33,3 +33,38 @@
   color: var(--texto-suave);
   font-size: 0.84rem;
 }
+
+.tabla th.tabla__numero,
+.tabla td.tabla__numero {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.codigo {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 0.1rem 0.4rem;
+}
+
+.campo--casilla {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.campo--casilla input[type='checkbox'] {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.2rem;
+  padding: 0;
+  accent-color: var(--azul);
+}
+
+.campo--casilla > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}

@@ -1,10 +1,12 @@
 import { useSearchParams } from 'react-router-dom';
 import CategoriasTab from './categorias/CategoriasTab.jsx';
+import ProductosTab from './productos/ProductosTab.jsx';
 import ProveedoresTab from './proveedores/ProveedoresTab.jsx';
 import './catalogo.css';
 
-/** Pestañas del catálogo. Para sumar una (por ejemplo Productos), se agrega acá. */
+/** Pestañas del catálogo; la primera es la que se abre por defecto. */
 const PESTANAS = [
+  { id: 'productos', titulo: 'Productos', Componente: ProductosTab },
   { id: 'categorias', titulo: 'Categorías', Componente: CategoriasTab },
   { id: 'proveedores', titulo: 'Proveedores', Componente: ProveedoresTab },
 ];
@@ -20,7 +22,7 @@ export default function CatalogoPage() {
       <header className="pagina__encabezado">
         <div>
           <h1>Catálogo</h1>
-          <p className="pagina__bajada">Categorías y proveedores que se usan para dar de alta los productos.</p>
+          <p className="pagina__bajada">Productos, categorías y proveedores del inventario.</p>
         </div>
       </header>
 
@@ -42,6 +44,7 @@ export default function CatalogoPage() {
       </div>
 
       <div id="panel-catalogo" role="tabpanel" aria-labelledby={`pestana-${actual.id}`}>
+        {/* La key vuelve a montar la pestaña al cambiar, así los selects traen categorías y proveedores actualizados */}
         <Componente key={actual.id} />
       </div>
     </div>

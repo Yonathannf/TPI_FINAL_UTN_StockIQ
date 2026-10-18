@@ -10,8 +10,16 @@ import { FILTRO_ACTIVO } from '../ui/FiltroActivo.jsx';
  * - `camposBusqueda`: función que da los textos de un registro sobre los que se busca.
  * - `femenino`: para concordar los avisos ("desactivada" / "desactivado").
  * - `etiqueta`: cómo nombrar un registro en los avisos (por defecto, su `nombre`).
+ * - `filtrosExtra`: filtros propios del recurso que se mandan al backend (por ejemplo `categoriaId`).
+ *   Los valores vacíos ('' o undefined) no se envían.
  */
-export default function useAbm({ api, camposBusqueda, femenino = false, etiqueta = (item) => item.nombre }) {
+export default function useAbm({
+  api,
+  camposBusqueda,
+  femenino = false,
+  etiqueta = (item) => item.nombre,
+  filtrosExtra = {},
+}) {
   const [items, setItems] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -21,17 +29,23 @@ export default function useAbm({ api, camposBusqueda, femenino = false, etiqueta
   const [formulario, setFormulario] = useState(null); // { item? } | null
   const [confirmacion, setConfirmacion] = useState(null); // { tipo: 'baja' | 'eliminar', item, error, procesando } | null
 
+  // Clave estable para no recargar en cada render aunque `filtrosExtra` sea un objeto nuevo
+  const claveExtra = JSON.stringify(filtrosExtra);
+
   const cargar = useCallback(async () => {
     setCargando(true);
     setError('');
     try {
-      setItems(await api.listar({ activo: FILTRO_ACTIVO[filtro] }));
+      const extra = Object.fromEntries(
+        Object.entries(JSON.parse(claveExtra)).filter(([, valor]) => valor !== '' && valor != null)
+      );
+      setItems(await api.listar({ ...extra, activo: FILTRO_ACTIVO[filtro] }));
     } catch (err) {
       setError(mensajeDeError(err));
     } finally {
       setCargando(false);
     }
-  }, [api, filtro]);
+  }, [api, filtro, claveExtra]);
 
   useEffect(() => {
     cargar();
