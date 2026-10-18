@@ -6,6 +6,12 @@ import InicioPage from './shared/pages/InicioPage.jsx';
 import PaginaPendiente from './shared/pages/PaginaPendiente.jsx';
 import NoEncontrada from './shared/pages/NoEncontrada.jsx';
 import { SECCIONES } from './shared/layout/navegacion.js';
+import DepositosPage from './depositos/DepositosPage.jsx';
+
+/** Pantallas ya desarrolladas, por ruta. Las que faltan muestran "en desarrollo". */
+const PANTALLAS = {
+  '/depositos': <DepositosPage />,
+};
 
 export default function App() {
   return (
@@ -21,14 +27,14 @@ export default function App() {
       >
         <Route index element={<InicioPage />} />
 
-        {/* Cada sección se reemplaza por su pantalla real a medida que se desarrolla */}
+        {/* Cada sección se reemplaza por su pantalla real a medida que se desarrolla (ver PANTALLAS) */}
         {SECCIONES.flatMap((grupo) => grupo.items).map((item) => (
           <Route
             key={item.ruta}
             path={item.ruta}
             element={
               <RutaProtegida roles={item.roles}>
-                <PaginaPendiente titulo={item.titulo} descripcion={item.descripcion} />
+                {PANTALLAS[item.ruta] ?? <PaginaPendiente titulo={item.titulo} descripcion={item.descripcion} />}
               </RutaProtegida>
             }
           />

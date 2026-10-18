@@ -1,0 +1,199 @@
+/* Componentes compartidos de las pantallas ABM: tabla, filtros, insignias y modal. */
+
+/* ---------- Barra de herramientas ---------- */
+.herramientas {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.filtro__etiqueta {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.filtro input,
+.filtro select {
+  font: inherit;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-control);
+  background: var(--superficie);
+  color: var(--texto);
+  min-width: 11rem;
+}
+
+.filtro input:focus-visible,
+.filtro select:focus-visible {
+  outline: none;
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(47, 91, 216, 0.18);
+}
+
+.filtro--ancho {
+  flex: 1 1 14rem;
+}
+
+.filtro--ancho input {
+  width: 100%;
+}
+
+/* ---------- Tabla ---------- */
+.tabla__contenedor {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.tabla th {
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texto-suave);
+  font-weight: 700;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--borde);
+  white-space: nowrap;
+}
+
+.tabla td {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla tbody tr:hover {
+  background: #fafbfd;
+}
+
+.tabla tr.fila--inactiva td:not(.tabla__acciones) {
+  color: var(--texto-suave);
+}
+
+.tabla__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.tabla__acciones .boton-icono {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.tabla__vacio {
+  color: var(--texto-suave);
+}
+
+/* ---------- Insignias ---------- */
+.insignia {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.insignia--activo {
+  background: var(--exito-suave);
+  color: var(--exito);
+}
+
+.insignia--inactivo {
+  background: var(--fondo);
+  color: var(--texto-suave);
+  border: 1px solid var(--borde);
+}
+
+/* ---------- Mensajes ---------- */
+.alerta--exito {
+  background: var(--exito-suave);
+  color: var(--exito);
+}
+
+.campo__error {
+  color: var(--error);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.campo input[aria-invalid='true'],
+.campo select[aria-invalid='true'] {
+  border-color: var(--error);
+}
+
+.campo__ayuda {
+  color: var(--texto-suave);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+/* ---------- Modal ---------- */
+.modal__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(23, 32, 54, 0.45);
+}
+
+.modal {
+  width: 100%;
+  max-width: 30rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(23, 32, 54, 0.25);
+}
+
+.modal:focus {
+  outline: none;
+}
+
+.modal__encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.modal__encabezado h2 {
+  margin: 0;
+}
+
+.modal__cuerpo {
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.modal__mensaje {
+  margin: 0 0 1rem;
+}
+
+.modal__pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.5rem 1.5rem 1.5rem;
+}
