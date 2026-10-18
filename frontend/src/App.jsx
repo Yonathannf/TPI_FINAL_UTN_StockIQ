@@ -6,10 +6,12 @@ import InicioPage from './shared/pages/InicioPage.jsx';
 import PaginaPendiente from './shared/pages/PaginaPendiente.jsx';
 import NoEncontrada from './shared/pages/NoEncontrada.jsx';
 import { SECCIONES } from './shared/layout/navegacion.js';
+import CatalogoPage from './catalogo/CatalogoPage.jsx';
 import DepositosPage from './depositos/DepositosPage.jsx';
 
 /** Pantallas ya desarrolladas, por ruta. Las que faltan muestran "en desarrollo". */
 const PANTALLAS = {
+  '/catalogo': <CatalogoPage />,
   '/depositos': <DepositosPage />,
 };
 

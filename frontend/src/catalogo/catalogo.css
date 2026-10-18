@@ -1,0 +1,35 @@
+/* ---------- Pestañas del catálogo ---------- */
+.pestanas {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--borde);
+  overflow-x: auto;
+}
+
+.pestana {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.75rem 1.1rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  color: var(--texto-suave);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pestana:hover {
+  color: var(--texto);
+}
+
+.pestana--activa {
+  color: var(--azul);
+  border-bottom-color: var(--azul);
+}
+
+.tabla__secundario {
+  color: var(--texto-suave);
+  font-size: 0.84rem;
+}
