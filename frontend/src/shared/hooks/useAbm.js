@@ -9,8 +9,9 @@ import { FILTRO_ACTIVO } from '../ui/FiltroActivo.jsx';
  * - `api`: lo que devuelve crearApiRecurso().
  * - `camposBusqueda`: función que da los textos de un registro sobre los que se busca.
  * - `femenino`: para concordar los avisos ("desactivada" / "desactivado").
+ * - `etiqueta`: cómo nombrar un registro en los avisos (por defecto, su `nombre`).
  */
-export default function useAbm({ api, camposBusqueda, femenino = false }) {
+export default function useAbm({ api, camposBusqueda, femenino = false, etiqueta = (item) => item.nombre }) {
   const [items, setItems] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -51,7 +52,7 @@ export default function useAbm({ api, camposBusqueda, femenino = false }) {
   /** Se llama desde el formulario cuando el guardado salió bien. */
   function alGuardar(guardado, accion) {
     setFormulario(null);
-    setAviso(`"${guardado.nombre}" ${accion} correctamente.`);
+    setAviso(`"${etiqueta(guardado)}" ${accion} correctamente.`);
     cargar();
   }
 
@@ -60,7 +61,7 @@ export default function useAbm({ api, camposBusqueda, femenino = false }) {
     setError('');
     try {
       await api.activar(item.id);
-      setAviso(`"${item.nombre}" activad${sufijo}.`);
+      setAviso(`"${etiqueta(item)}" activad${sufijo}.`);
       cargar();
     } catch (err) {
       setError(mensajeDeError(err));
@@ -74,7 +75,7 @@ export default function useAbm({ api, camposBusqueda, femenino = false }) {
       if (tipo === 'baja') await api.desactivar(item.id);
       else await api.eliminar(item.id);
       setConfirmacion(null);
-      setAviso(`"${item.nombre}" ${tipo === 'baja' ? 'desactivad' : 'eliminad'}${sufijo}.`);
+      setAviso(`"${etiqueta(item)}" ${tipo === 'baja' ? 'desactivad' : 'eliminad'}${sufijo}.`);
       cargar();
     } catch (err) {
       // 409: por ejemplo, tiene productos asociados o stock
