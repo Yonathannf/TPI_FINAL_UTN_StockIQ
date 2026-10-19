@@ -1,0 +1,25 @@
+.insignia--rol-encargado {
+  background: var(--azul-suave);
+  color: var(--azul-oscuro);
+}
+
+.insignia--rol-operario {
+  background: var(--alerta-suave);
+  color: var(--alerta);
+}
+
+.usuario__tu {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.boton-icono:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
