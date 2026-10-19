@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -104,7 +105,7 @@ class UsuarioServiceTest {
     void actualizar_pasarAOperarioAlUltimoEncargadoActivo_responde409_RN40() {
         Usuario ultimo = usuario(OTRO, Rol.ENCARGADO, true);
         when(usuarioRepository.findById(OTRO)).thenReturn(Optional.of(ultimo));
-        when(usuarioRepository.countByRolAndActivoTrue(Rol.ENCARGADO)).thenReturn(1L);
+        when(usuarioRepository.bloquearActivosPorRol(Rol.ENCARGADO)).thenReturn(List.of(ultimo));
 
         assertThatThrownBy(() -> servicio.actualizar(OTRO,
                 new UsuarioUpdateRequest("A", "B", Rol.OPERARIO, null), YO))
@@ -117,7 +118,8 @@ class UsuarioServiceTest {
     void actualizar_pasarAOperarioUnEncargadoCuandoHayOtroActivo_funciona() {
         Usuario encargado = usuario(OTRO, Rol.ENCARGADO, true);
         when(usuarioRepository.findById(OTRO)).thenReturn(Optional.of(encargado));
-        when(usuarioRepository.countByRolAndActivoTrue(Rol.ENCARGADO)).thenReturn(2L);
+        when(usuarioRepository.bloquearActivosPorRol(Rol.ENCARGADO))
+                .thenReturn(List.of(encargado, usuario(3L, Rol.ENCARGADO, true)));
 
         UsuarioResponse respuesta = servicio.actualizar(OTRO,
                 new UsuarioUpdateRequest("Nuevo", "Nombre", Rol.OPERARIO, null), YO);
@@ -165,7 +167,7 @@ class UsuarioServiceTest {
     void desactivar_alUltimoEncargadoActivo_responde409_RN40() {
         Usuario ultimo = usuario(OTRO, Rol.ENCARGADO, true);
         when(usuarioRepository.findById(OTRO)).thenReturn(Optional.of(ultimo));
-        when(usuarioRepository.countByRolAndActivoTrue(Rol.ENCARGADO)).thenReturn(1L);
+        when(usuarioRepository.bloquearActivosPorRol(Rol.ENCARGADO)).thenReturn(List.of(ultimo));
 
         assertThatThrownBy(() -> servicio.desactivar(OTRO, YO))
                 .isInstanceOf(ConflictException.class)

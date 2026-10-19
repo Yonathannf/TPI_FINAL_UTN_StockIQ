@@ -2,7 +2,7 @@
 # no hay valores por defecto a propósito: si falta alguna, el backend no arranca.
 #
 # DB_URL debe estar en formato JDBC, por ejemplo:
-#   jdbc:mysql://<host>:<puerto>/<base>?connectionTimeZone=UTC&useUnicode=true&characterEncoding=utf8
+#   jdbc:mysql://<host>:<puerto>/<base>?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&useUnicode=true&characterEncoding=utf8
 spring:
   datasource:
     url: ${DB_URL}

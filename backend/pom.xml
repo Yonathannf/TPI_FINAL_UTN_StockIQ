@@ -104,12 +104,6 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- H2: SOLO para tests unitarios de la capa Service -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
         <!-- Testcontainers (MySQL real) para tests de integración -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
