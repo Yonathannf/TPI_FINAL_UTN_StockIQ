@@ -1,0 +1,213 @@
+.app {
+  display: grid;
+  grid-template-columns: 15.5rem minmax(0, 1fr);
+  min-height: 100%;
+}
+
+/* ---------- Menú lateral ---------- */
+.lateral {
+  background: var(--superficie);
+  border-right: 1px solid var(--borde);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.lateral__marca {
+  padding: 0 0.4rem;
+  margin-bottom: 2rem;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.menu__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 1.1rem;
+}
+
+.menu__grupo-titulo {
+  margin: 0 0 0.25rem;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.menu__link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radio-control);
+  text-decoration: none;
+  color: #47506a;
+  font-weight: 500;
+}
+
+.menu__link svg {
+  color: #7d869c;
+}
+
+.menu__link:hover {
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+.menu__link.active {
+  background: var(--azul-suave);
+  color: var(--azul);
+  font-weight: 600;
+}
+
+.menu__link.active svg {
+  color: var(--azul);
+}
+
+.lateral__pie {
+  margin: auto 0 0;
+  padding: 1.25rem 0.4rem 0;
+  border-top: 1px solid var(--borde);
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+/* ---------- Barra superior ---------- */
+.principal {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 2.25rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.barra__menu {
+  display: none;
+}
+
+.barra__ubicacion {
+  flex: 1;
+  min-width: 0;
+}
+
+.barra__grupo {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--azul);
+}
+
+.barra__titulo {
+  margin: 0;
+  font-weight: 700;
+}
+
+.barra__usuario {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--borde);
+}
+
+.barra__datos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.barra__nombre {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.barra__rol {
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+/* ---------- Contenido ---------- */
+.contenido {
+  padding: 2.25rem;
+}
+
+/* ---------- Celular y tablet ---------- */
+@media (max-width: 56rem) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lateral {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(17rem, 85vw);
+    z-index: 30;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .lateral--abierto {
+    transform: translateX(0);
+  }
+
+  .velo {
+    position: fixed;
+    inset: 0;
+    background: rgba(23, 32, 54, 0.35);
+    z-index: 20;
+  }
+
+  .barra {
+    padding: 0.75rem 1rem;
+  }
+
+  .barra__menu {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radio-control);
+    border: 1px solid var(--borde);
+    background: var(--superficie);
+    color: var(--texto);
+    cursor: pointer;
+  }
+
+  .barra__datos {
+    display: none;
+  }
+
+  .barra__usuario {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .contenido {
+    padding: 1.5rem 1rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
