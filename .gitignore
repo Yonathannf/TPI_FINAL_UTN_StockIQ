@@ -3,12 +3,18 @@ target/
 node_modules/
 dist/
 
-# Secretos locales
+# Java
+*.class
+*.log
+
+# Secretos locales (la plantilla .env.example sí se sube)
 .env
 .env.*
+!.env.example
 
-# IDEs y sistema
+# IDEs y sistema operativo
 .idea/
 .vscode/
 *.iml
 .DS_Store
+Thumbs.db
