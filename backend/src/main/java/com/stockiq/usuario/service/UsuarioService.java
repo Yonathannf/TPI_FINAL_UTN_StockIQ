@@ -107,8 +107,8 @@ public class UsuarioService {
         return usuarioRepository.findById(id).orElseThrow(() -> NotFoundException.of("Usuario", id));
     }
 
-    /** Se invoca solo cuando el usuario evaluado es un ENCARGADO activo, por lo que ya está contado. */
+       /** Bloquea a los ENCARGADO activos antes de contarlos, así dos bajas simultáneas no pasan las dos (RN-40). */
     private boolean esElUltimoEncargadoActivo() {
-        return usuarioRepository.countByRolAndActivoTrue(Rol.ENCARGADO) <= 1;
+        return usuarioRepository.bloquearActivosPorRol(Rol.ENCARGADO).size() <= 1;
     }
 }

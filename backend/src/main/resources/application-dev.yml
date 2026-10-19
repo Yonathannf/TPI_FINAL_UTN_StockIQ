@@ -1,9 +1,9 @@
-# Desarrollo local: MySQL real (el proyecto no usa H2 fuera de los tests unitarios).
+# Desarrollo local: MySQL real.
 # Los valores por defecto coinciden con los de docker-compose.yml, así que corre igual
 # desde el IDE (con `docker-compose up -d mysql`) o dentro del contenedor.
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/stockiq?connectionTimeZone=UTC&useUnicode=true&characterEncoding=utf8}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/stockiq?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&useUnicode=true&characterEncoding=utf8}
     username: ${DB_USERNAME:stockiq}
     password: ${DB_PASSWORD:stockiq}
 
