@@ -1,0 +1,34 @@
+# Configuración común a todos los entornos.
+# Lo específico de cada entorno (base de datos, JWT, CORS) vive en application-dev.yml / application-prod.yml.
+spring:
+  application:
+    name: stockiq
+  profiles:
+    default: dev
+  jpa:
+    open-in-view: false
+    hibernate:
+      # D-14: el esquema lo gestiona Flyway; Hibernate solo verifica que las entidades coincidan.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # D-16: fechas en UTC
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    deserialization:
+      # RN-41: si el cliente manda un campo desconocido (por ejemplo `fecha` en un movimiento), responde 400.
+      fail-on-unknown-properties: true
+
+server:
+  # Render asigna el puerto por la variable PORT
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

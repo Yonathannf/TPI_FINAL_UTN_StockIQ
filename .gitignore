@@ -1,17 +1,16 @@
-# Java / Maven
-backend/target/
+# Build
+target/
+node_modules/
+dist/
+
+# Java
 *.class
 *.log
 
-# Node / Vite
-frontend/node_modules/
-frontend/dist/
-
-# Variables de entorno 
+# Secretos locales (la plantilla .env.example sí se sube)
 .env
-.env.local
-frontend/.env
-frontend/.env.local
+.env.*
+!.env.example
 
 # IDEs y sistema operativo
 .idea/
