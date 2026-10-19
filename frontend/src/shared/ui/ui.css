@@ -51,6 +51,8 @@
 /* ---------- Tabla ---------- */
 .tabla__contenedor {
   overflow-x: auto;
+  /* Contiene a los textos .solo-lectores (position:absolute) para que no ensanchen la página en celular */
+  position: relative;
 }
 
 .tabla {
@@ -89,16 +91,21 @@
   color: var(--texto-suave);
 }
 
+/* La celda se queda como table-cell (con display:flex se corta la línea de la fila) */
 .tabla__acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
+  text-align: right;
   white-space: nowrap;
 }
 
 .tabla__acciones .boton-icono {
+  display: inline-grid;
+  vertical-align: middle;
   width: 2.25rem;
   height: 2.25rem;
+}
+
+.tabla__acciones .boton-icono + .boton-icono {
+  margin-left: 0.5rem;
 }
 
 .tabla__vacio {
