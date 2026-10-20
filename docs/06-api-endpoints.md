@@ -14,12 +14,20 @@ Contrato de la API del backend. Todas las rutas, salvo el login, requieren el he
 | Paginación | El historial de movimientos usa `page` (desde 0) y `size` (por defecto 20, máximo 100) y devuelve el total de elementos y de páginas. |
 | Fechas | Formato ISO 8601 (`2026-09-27` o `2026-09-27T14:30:00`). |
 | Usuario responsable | Se toma del token; nunca se envía en el cuerpo del pedido. |
+| Cuerpos de pedido | Solo admiten los campos indicados en cada sección. Cualquier otro (por ejemplo `id`, `activo` o `fecha`) se rechaza con 400 y el código `CAMPO_NO_PERMITIDO`. Los campos marcados con `?` son opcionales. |
+| Respuestas | Cada sección indica la forma del JSON que devuelve el recurso. Un `DELETE` exitoso responde 204 sin cuerpo. |
 
 ## 2. Autenticación
 
 | Método | Ruta | Rol | Descripción | Req. |
 |---|---|---|---|---|
-| POST | `/auth/login` | Público | Recibe usuario y contraseña; devuelve el token JWT, el rol y el nombre del usuario. | RF-01 |
+| POST | `/auth/login` | Público | Recibe usuario y contraseña; devuelve el token JWT y los datos del usuario. | RF-01 |
+| GET | `/auth/me` | Todos | Devuelve los datos del usuario autenticado. El frontend lo usa para recuperar la sesión al recargar la página. | RF-01, RF-02 |
+
+**Cuerpos (JSON).**
+
+- Respuesta de `POST /auth/login`: `{ token, usuario: { id, username, nombre, apellido, rol } }`.
+- Respuesta de `GET /auth/me`: `{ id, username, nombre, apellido, rol }` (el mismo objeto `usuario` del login).
 
 ## 3. Usuarios
 
@@ -31,6 +39,12 @@ Contrato de la API del backend. Todas las rutas, salvo el login, requieren el he
 | PUT | `/usuarios/{id}` | ENCARGADO | Edita nombre, apellido, rol y, opcionalmente, la contraseña; rechaza con 409 si cambia a `OPERARIO` al último `ENCARGADO` activo o si el usuario autenticado cambia su propio rol. | RF-03, RN-40 |
 | PATCH | `/usuarios/{id}/desactivar` | ENCARGADO | Baja lógica; rechaza con 409 si es el propio usuario autenticado o el último `ENCARGADO` activo. | RF-03, RN-40 |
 | PATCH | `/usuarios/{id}/activar` | ENCARGADO | Reactiva el usuario. | RF-03 |
+
+**Cuerpos (JSON).**
+
+- Pedido de `POST`: `{ username, password, nombre, apellido, rol }`.
+- Pedido de `PUT`: `{ nombre, apellido, rol, password? }`. El `username` no se modifica; si `password` no viene, la contraseña no cambia.
+- Respuesta: `{ id, username, nombre, apellido, rol, activo }`. Nunca incluye la contraseña.
 
 ## 4. Catálogo
 
@@ -45,6 +59,11 @@ Contrato de la API del backend. Todas las rutas, salvo el login, requieren el he
 | PATCH | `/categorias/{id}/activar` | ENCARGADO | Reactiva la categoría. | RF-08 |
 | DELETE | `/categorias/{id}` | ENCARGADO | Elimina físicamente una categoría sin productos asociados. | RN-45, RN-46 |
 
+**Cuerpos (JSON).**
+
+- Pedido de `POST` y `PUT`: `{ nombre, descripcion? }`.
+- Respuesta: `{ id, nombre, descripcion, activo }`.
+
 ### 4.2 Proveedores
 | Método | Ruta | Rol | Descripción | Req. |
 |---|---|---|---|---|
@@ -56,6 +75,11 @@ Contrato de la API del backend. Todas las rutas, salvo el login, requieren el he
 | PATCH | `/proveedores/{id}/activar` | ENCARGADO | Reactiva el proveedor. | RF-05 |
 | DELETE | `/proveedores/{id}` | ENCARGADO | Elimina físicamente un proveedor sin productos asociados. | RN-31, RN-46 |
 
+**Cuerpos (JSON).**
+
+- Pedido de `POST` y `PUT`: `{ nombre, contacto?, telefono?, email?, leadTimeDias }`.
+- Respuesta: `{ id, nombre, contacto, telefono, email, leadTimeDias, activo }`.
+
 ### 4.3 Productos
 | Método | Ruta | Rol | Descripción | Req. |
 |---|---|---|---|---|
@@ -65,6 +89,13 @@ Contrato de la API del backend. Todas las rutas, salvo el login, requieren el he
 | PUT | `/productos/{id}` | ENCARGADO | Edita un producto; rechaza con 409 si se le asigna una categoría o un proveedor inactivo, o si se lo pasa a no fraccionable con stock no entero. | RF-06, RN-43, RN-47 |
 | PATCH | `/productos/{id}/desactivar` | ENCARGADO | Baja lógica; rechaza con 409 si el producto tiene stock, stock en tránsito o transferencias pendientes (RN-39). | RF-08, RN-39 |
 | PATCH | `/productos/{id}/activar` | ENCARGADO | Reactiva el producto. | RF-08 |
+
+**Cuerpos (JSON).**
+
+- Pedido de `POST` y `PUT`: `{ codigo, nombre, categoriaId, proveedorId, unidadMedida, precioReferencia, stockSeguridad, fraccionable }`.
+- Respuesta: `{ id, codigo, nombre, categoria: { id, nombre, activo }, proveedor: { id, nombre, activo }, unidadMedida, precioReferencia, stockSeguridad, fraccionable, activo }`.
+
+En el pedido, la categoría y el proveedor se indican por id (`categoriaId`, `proveedorId`); en la respuesta vienen **anidados**, con su nombre y su estado, para que el frontend pueda mostrarlos sin otra consulta y marcar los inactivos (RN-42, RN-43).
 
 ## 5. Depósitos
 
@@ -76,6 +107,11 @@ Contrato de la API del backend. Todas las rutas, salvo el login, requieren el he
 | PUT | `/depositos/{id}` | ENCARGADO | Edita un depósito. | RF-07 |
 | PATCH | `/depositos/{id}/desactivar` | ENCARGADO | Baja lógica; rechaza con 409 si el depósito tiene stock o transferencias pendientes (RN-38). | RF-08, RN-38 |
 | PATCH | `/depositos/{id}/activar` | ENCARGADO | Reactiva el depósito. | RF-08 |
+
+**Cuerpos (JSON).**
+
+- Pedido de `POST` y `PUT`: `{ nombre, ubicacion? }`.
+- Respuesta: `{ id, nombre, ubicacion, activo }`.
 
 ## 6. Movimientos
 

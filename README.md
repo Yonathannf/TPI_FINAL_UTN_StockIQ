@@ -23,7 +23,8 @@ Repositorio correspondiente al Trabajo Práctico Final de la Tecnicatura Univers
 | 3 | [Diseño de la base de datos](docs/03-diseno-base-de-datos.md) | Decisiones de diseño, normalización, diccionario de datos, índices y consultas |
 | 4 | [Módulos](docs/04-modulos.md) | Paquetes del backend, secciones del frontend y orden de desarrollo |
 | 5 | [Diagramas](docs/05-diagramas.md) | DER, casos de uso, secuencia, estados, arquitectura y clases |
-| 6 | [API](docs/06-api-endpoints.md) | Endpoints, roles, requerimientos asociados y formato de errores |
+| 6 | [API](docs/06-api-endpoints.md) | Endpoints, roles, cuerpos de pedido y respuesta, y formato de errores |
+| 7 | [Despliegue](docs/07-despliegue.md) | Variables de entorno y pasos para Railway, Render y Vercel |
 
 Scripts de base de datos (Flyway): [`V1__esquema_inicial.sql`](backend/src/main/resources/db/migration/V1__esquema_inicial.sql) · [`V2__ajustes_cierre_analisis.sql`](backend/src/main/resources/db/migration/V2__ajustes_cierre_analisis.sql)
 
@@ -223,7 +224,8 @@ TPI_FINAL_UTN_StockIQ/
 │   ├── 03-diseno-base-de-datos.md
 │   ├── 04-modulos.md
 │   ├── 05-diagramas.md
-│   └── 06-api-endpoints.md
+│   ├── 06-api-endpoints.md
+│   └── 07-despliegue.md
 │
 ├── backend/
 │   ├── src/main/java/com/stockiq/
@@ -265,15 +267,15 @@ TPI_FINAL_UTN_StockIQ/
 
 ## Cómo levantar el proyecto localmente
 
-> Disponible a partir de la etapa de desarrollo. Requiere Docker y Node.js.
+Requiere Docker Desktop y Node.js 18 o superior.
 
 ```bash
 # Clonar el repositorio
 git clone https://github.com/Yonathannf/TPI_FINAL_UTN_StockIQ.git
 cd TPI_FINAL_UTN_StockIQ
 
-# Backend + base de datos MySQL
-docker-compose up -d
+# Backend + base de datos MySQL (la primera vez tarda unos minutos en compilar)
+docker compose up -d --build
 
 # Frontend
 cd frontend
@@ -281,7 +283,22 @@ npm install
 npm run dev
 ```
 
-El backend queda disponible en `http://localhost:8080` y el frontend en `http://localhost:5173`. Al primer arranque se crea un usuario `ENCARGADO` inicial.
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:8080` (estado en `/actuator/health`)
+- MySQL: `localhost:3306`, base `stockiq`, usuario y contraseña `stockiq`. Si ya hay un MySQL instalado en la máquina usando ese puerto, hay que detenerlo antes.
+
+Al primer arranque se crea el usuario `ENCARGADO` inicial. En desarrollo es **admin** / **admin1234**.
+
+Para correr el backend desde el IDE en lugar de Docker, se levanta solo la base con `docker compose up -d mysql` y se ejecuta `StockiqApplication`: el perfil `dev` ya apunta a `localhost:3306`. El archivo `backend/http/semana-2.http` tiene pedidos de ejemplo para probar la API con la extensión REST Client de VS Code.
+
+Tests y reporte de cobertura (`backend/target/site/jacoco/index.html`), con Java 17 o superior y Maven:
+
+```bash
+cd backend
+mvn test
+```
+
+Los tests de integración usan MySQL real con Testcontainers: corren si Docker está abierto y, si no, se saltean solos.
 
 ## Entornos desplegados
 

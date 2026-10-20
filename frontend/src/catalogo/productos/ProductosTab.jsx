@@ -11,7 +11,7 @@ import { formatearCantidad, formatearPrecio } from './decimales.js';
 import ProductoForm from './ProductoForm.jsx';
 import { productosApi } from './productosApi.js';
 
-const camposBusqueda = (p) => [p.codigo, p.nombre, p.categoriaNombre, p.proveedorNombre];
+const camposBusqueda = (p) => [p.codigo, p.nombre, p.categoria?.nombre, p.proveedor?.nombre];
 const etiqueta = (p) => p.nombre;
 
 /** Listado y ABM de productos con filtros por categoría, proveedor y estado (RF-06, RF-08). */
@@ -131,9 +131,9 @@ export default function ProductosTab() {
                   </td>
                   <td>
                     <strong>{p.nombre}</strong>
-                    <div className="tabla__secundario">{p.categoriaNombre}</div>
+                    <div className="tabla__secundario">{p.categoria?.nombre}</div>
                   </td>
-                  <td>{p.proveedorNombre}</td>
+                  <td>{p.proveedor?.nombre}</td>
                   <td>
                     {p.unidadMedida}
                     {!p.fraccionable && <div className="tabla__secundario">Solo enteros</div>}

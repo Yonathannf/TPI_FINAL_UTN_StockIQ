@@ -22,8 +22,8 @@ export default function ProductoForm({ producto, categorias, proveedores, onGuar
   const [datos, setDatos] = useState({
     codigo: producto?.codigo ?? '',
     nombre: producto?.nombre ?? '',
-    categoriaId: producto?.categoriaId?.toString() ?? '',
-    proveedorId: producto?.proveedorId?.toString() ?? '',
+    categoriaId: producto?.categoria?.id?.toString() ?? '',
+    proveedorId: producto?.proveedor?.id?.toString() ?? '',
     unidadMedida: producto?.unidadMedida ?? '',
     precioReferencia: aTextoDecimal(producto?.precioReferencia),
     stockSeguridad: producto ? aTextoDecimal(producto.stockSeguridad) : '0',
@@ -157,13 +157,13 @@ export default function ProductoForm({ producto, categorias, proveedores, onGuar
         {campoSelect(
           'categoriaId',
           'Categoría',
-          opcionesDe(categorias, producto?.categoriaId),
+          opcionesDe(categorias, producto?.categoria?.id),
           'Elegí una categoría'
         )}
         {campoSelect(
           'proveedorId',
           'Proveedor',
-          opcionesDe(proveedores, producto?.proveedorId),
+          opcionesDe(proveedores, producto?.proveedor?.id),
           'Elegí un proveedor'
         )}
 
