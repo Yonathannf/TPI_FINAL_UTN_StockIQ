@@ -1,0 +1,77 @@
+### Pruebas manuales de la semana 2 (extensión "REST Client" de VS Code).
+### Hacé clic en "Send Request" arriba de cada pedido, en orden.
+
+@api = http://localhost:8080
+
+### 1. Login: copiá el "token" de la respuesta y pegalo en la variable de abajo
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{ "username": "admin", "password": "admin1234" }
+
+###
+@token = PEGAR_ACA_EL_TOKEN
+
+### 2. Crear categoría
+POST {{api}}/categorias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nombre": "Bebidas", "descripcion": "Gaseosas, aguas y jugos" }
+
+### 3. Crear proveedor
+POST {{api}}/proveedores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nombre": "Distribuidora Sur", "contacto": "Ana López", "telefono": "11 5555-1234", "email": "compras@sur.com", "leadTimeDias": 5 }
+
+### 4. Crear producto (usa la categoría 1 y el proveedor 1)
+POST {{api}}/productos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "codigo": "BEB-001", "nombre": "Agua mineral 2 L", "categoriaId": 1, "proveedorId": 1, "unidadMedida": "un", "precioReferencia": 850.00, "stockSeguridad": 24, "fraccionable": false }
+
+### 5. Listar productos filtrando por texto
+GET {{api}}/productos?texto=agua
+Authorization: Bearer {{token}}
+
+### 6. Crear depósito
+POST {{api}}/depositos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nombre": "Central", "ubicacion": "Av. Siempre Viva 742" }
+
+### 7. Error esperado 409 NOMBRE_DUPLICADO
+POST {{api}}/depositos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "nombre": "central" }
+
+### 8. Error esperado 409 CATEGORIA_CON_PRODUCTOS
+DELETE {{api}}/categorias/1
+Authorization: Bearer {{token}}
+
+### 9. Desactivar la categoría (permitido) y después intentar crear un producto con ella: 409 CATEGORIA_INACTIVA
+PATCH {{api}}/categorias/1/desactivar
+Authorization: Bearer {{token}}
+
+###
+POST {{api}}/productos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "codigo": "BEB-002", "nombre": "Agua con gas 2 L", "categoriaId": 1, "proveedorId": 1, "unidadMedida": "un", "precioReferencia": 900.00, "stockSeguridad": 12, "fraccionable": false }
+
+### 10. Error esperado 400 VALIDACION (precio negativo y sin unidad de medida)
+POST {{api}}/productos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "codigo": "X-1", "nombre": "Prueba", "categoriaId": 1, "proveedorId": 1, "unidadMedida": "", "precioReferencia": -5, "stockSeguridad": 0, "fraccionable": true }
+
+### 11. Sin token: error esperado 401
+GET {{api}}/productos
