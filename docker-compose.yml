@@ -37,7 +37,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      DB_URL: jdbc:mysql://mysql:3306/stockiq?connectionTimeZone=UTC&useUnicode=true&characterEncoding=utf8
+      DB_URL: jdbc:mysql://mysql:3306/stockiq?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&useUnicode=true&characterEncoding=utf8
       DB_USERNAME: stockiq
       DB_PASSWORD: ${MYSQL_PASSWORD:-stockiq}
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-no-usar-en-produccion-123456}
