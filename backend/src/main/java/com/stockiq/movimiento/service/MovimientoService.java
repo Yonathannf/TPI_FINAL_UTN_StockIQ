@@ -186,7 +186,11 @@ public class MovimientoService {
         return deposito;
     }
 
-    /** RN-06: el origen no puede quedar con stock negativo. */
+    /**
+     * RN-06: el origen no puede quedar con stock negativo. Se llama después de bloquear el producto y los
+     * depósitos: en MySQL (REPEATABLE READ) la primera lectura sin bloqueo fija la foto de la transacción, y
+     * así esta lectura ya ve lo que confirmó el pedido que tenía el bloqueo antes.
+     */
     private void validarStock(Producto producto, Deposito origen, BigDecimal cantidad) {
         BigDecimal disponible = stockConsulta.stockEn(producto.getId(), origen.getId());
         if (cantidad.compareTo(disponible) > 0) {
