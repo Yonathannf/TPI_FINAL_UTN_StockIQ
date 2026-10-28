@@ -1,0 +1,87 @@
+### Pruebas manuales de la semana 3: movimientos y stock (extensión "REST Client" de VS Code).
+### Hacé clic en "Send Request" arriba de cada pedido, en orden. Antes correr las pruebas de semana-2.http
+### (o tener al menos un producto activo y dos depósitos activos) y reemplazar los ids de abajo.
+
+@api = http://localhost:8080
+@productoId = 1
+@depositoA = 1
+@depositoB = 2
+
+### 1. Login como ENCARGADO: copiá el "token" de la respuesta y pegalo en la variable de abajo
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{ "username": "admin", "password": "admin1234" }
+
+###
+@token = PEGAR_ACA_EL_TOKEN
+
+### 2. Entrada de 100 unidades al depósito A
+POST {{api}}/movimientos/entradas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productoId": {{productoId}}, "depositoDestinoId": {{depositoA}}, "cantidad": 100, "motivo": "Compra inicial" }
+
+### 3. Salida de 10 unidades del depósito A (el motivo es obligatorio)
+POST {{api}}/movimientos/salidas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productoId": {{productoId}}, "depositoOrigenId": {{depositoA}}, "cantidad": 10, "motivo": "Venta mostrador" }
+
+### 4. Salida sin motivo: debe responder 400 MOTIVO_OBLIGATORIO
+POST {{api}}/movimientos/salidas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productoId": {{productoId}}, "depositoOrigenId": {{depositoA}}, "cantidad": 1 }
+
+### 5. Salida de más de lo que hay: debe responder 409 STOCK_INSUFICIENTE
+POST {{api}}/movimientos/salidas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productoId": {{productoId}}, "depositoOrigenId": {{depositoA}}, "cantidad": 100000, "motivo": "Prueba" }
+
+### 6. Transferencia de 30 unidades de A a B: queda PENDIENTE y ya descuenta del origen
+POST {{api}}/movimientos/transferencias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productoId": {{productoId}}, "depositoOrigenId": {{depositoA}}, "depositoDestinoId": {{depositoB}}, "cantidad": 30 }
+
+### 7. Transferencias pendientes (copiá el "id" de la transferencia para los pasos 9 y 10)
+GET {{api}}/movimientos/transferencias/pendientes
+Authorization: Bearer {{token}}
+
+### 8. Stock del producto: A=60, B=0, totalDisponible=60, enTransito=30
+GET {{api}}/stock/productos/{{productoId}}
+Authorization: Bearer {{token}}
+
+###
+@movimientoId = PEGAR_ACA_EL_ID
+
+### 9. Confirmar la transferencia (solo ENCARGADO): suma 30 a B
+PATCH {{api}}/movimientos/{{movimientoId}}/confirmar
+Authorization: Bearer {{token}}
+
+### 10. Cancelar la misma transferencia: debe responder 409 TRANSFERENCIA_NO_PENDIENTE
+PATCH {{api}}/movimientos/{{movimientoId}}/cancelar
+Authorization: Bearer {{token}}
+
+### 11. Historial paginado, más reciente primero (filtros opcionales: productoId, depositoId, tipo, usuarioId, desde, hasta)
+GET {{api}}/movimientos?productoId={{productoId}}&page=0&size=20
+Authorization: Bearer {{token}}
+
+### 12. Historial de un rango de días (hora de Argentina, ambos inclusivos)
+GET {{api}}/movimientos?desde=2026-10-01&hasta=2026-10-31&tipo=TRANSFERENCIA
+Authorization: Bearer {{token}}
+
+### 13. Stock de todos los productos activos (filtros opcionales: productoId, depositoId)
+GET {{api}}/stock
+Authorization: Bearer {{token}}
+
+### 14. Stock en tránsito
+GET {{api}}/stock/transito
+Authorization: Bearer {{token}}
