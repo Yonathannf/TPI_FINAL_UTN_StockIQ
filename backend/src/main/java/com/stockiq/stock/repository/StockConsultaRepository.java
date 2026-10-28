@@ -99,6 +99,15 @@ public class StockConsultaRepository {
         return resultado;
     }
 
+    /** RN-16: stock actual de un producto en un depósito (0 si nunca tuvo movimientos). */
+    public BigDecimal stockEn(Long productoId, Long depositoId) {
+        BigDecimal stock = jdbc.queryForObject("""
+                SELECT COALESCE(SUM(stock), 0) FROM v_stock_deposito
+                 WHERE producto_id = :productoId AND deposito_id = :depositoId""",
+                Map.of("productoId", productoId, "depositoId", depositoId), BigDecimal.class);
+        return stock == null ? BigDecimal.ZERO : stock;
+    }
+
     /** Stock de un producto en un depósito, con los datos del depósito. */
     public record StockDepositoFila(Long productoId, Long depositoId, String depositoNombre,
                                     boolean depositoActivo, BigDecimal stock) {

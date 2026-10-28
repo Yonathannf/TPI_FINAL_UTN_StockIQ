@@ -49,6 +49,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/categorias/**", "/productos/**", "/depositos/**")
                                 .authenticated()
                         .requestMatchers("/categorias/**", "/productos/**", "/depositos/**").hasRole(ENCARGADO)
+                        // Confirmar y cancelar transferencias: solo ENCARGADO (RN-34)
+                        .requestMatchers(HttpMethod.PATCH, "/movimientos/*/confirmar", "/movimientos/*/cancelar")
+                                .hasRole(ENCARGADO)
                         // Movimientos, stock y /dashboard/stock: cualquier usuario autenticado
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService, usuarioRepository),
