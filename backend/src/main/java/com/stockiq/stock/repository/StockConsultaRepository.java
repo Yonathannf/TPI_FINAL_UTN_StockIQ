@@ -1,5 +1,8 @@
 package com.stockiq.stock.repository;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -64,6 +67,41 @@ public class StockConsultaRepository {
                   UNION ALL
                   SELECT 1 FROM v_stock_transito WHERE producto_id = :id AND en_transito <> FLOOR(en_transito)
                 )""", productoId);
+    }
+
+    /**
+     * RN-16: stock distinto de cero por depósito (con los datos del depósito), ordenado por nombre de
+     * depósito. Con {@code productoId} null trae todos los productos.
+     */
+    public List<StockDepositoFila> stockPorDeposito(Long productoId) {
+        String sql = """
+                SELECT s.producto_id, s.deposito_id, d.nombre, d.activo, s.stock
+                  FROM v_stock_deposito s
+                  JOIN deposito d ON d.id = s.deposito_id
+                 WHERE s.stock <> 0"""
+                + (productoId == null ? "" : " AND s.producto_id = :productoId")
+                + " ORDER BY d.nombre";
+        Map<String, Object> params = productoId == null ? Map.of() : Map.of("productoId", productoId);
+        return jdbc.query(sql, params, (rs, i) -> new StockDepositoFila(
+                rs.getLong("producto_id"), rs.getLong("deposito_id"), rs.getString("nombre"),
+                rs.getBoolean("activo"), rs.getBigDecimal("stock")));
+    }
+
+    /** RN-17: stock en tránsito (transferencias pendientes) por producto; solo productos con tránsito. */
+    public Map<Long, BigDecimal> enTransitoPorProducto(Long productoId) {
+        String sql = "SELECT producto_id, en_transito FROM v_stock_transito WHERE en_transito <> 0"
+                + (productoId == null ? "" : " AND producto_id = :productoId");
+        Map<String, Object> params = productoId == null ? Map.of() : Map.of("productoId", productoId);
+        Map<Long, BigDecimal> resultado = new HashMap<>();
+        jdbc.query(sql, params, rs -> {
+            resultado.put(rs.getLong("producto_id"), rs.getBigDecimal("en_transito"));
+        });
+        return resultado;
+    }
+
+    /** Stock de un producto en un depósito, con los datos del depósito. */
+    public record StockDepositoFila(Long productoId, Long depositoId, String depositoNombre,
+                                    boolean depositoActivo, BigDecimal stock) {
     }
 
     private boolean existe(String sql, Long id) {
