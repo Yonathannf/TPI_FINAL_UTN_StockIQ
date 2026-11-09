@@ -24,7 +24,7 @@ Repositorio correspondiente al Trabajo Práctico Final de la Tecnicatura Univers
 | 4 | [Módulos](docs/04-modulos.md) | Paquetes del backend, secciones del frontend y orden de desarrollo |
 | 5 | [Diagramas](docs/05-diagramas.md) | DER, casos de uso, secuencia, estados, arquitectura y clases |
 | 6 | [API](docs/06-api-endpoints.md) | Endpoints, roles, cuerpos de pedido y respuesta, y formato de errores |
-| 7 | [Despliegue](docs/07-despliegue.md) | Variables de entorno y pasos para Railway, Render y Vercel |
+| 7 | [Despliegue](docs/07-despliegue.md) | Variables de entorno y pasos para Aiven, Render y Vercel |
 
 Scripts de base de datos (Flyway): [`V1__esquema_inicial.sql`](backend/src/main/resources/db/migration/V1__esquema_inicial.sql) · [`V2__ajustes_cierre_analisis.sql`](backend/src/main/resources/db/migration/V2__ajustes_cierre_analisis.sql)
 
@@ -179,7 +179,7 @@ El valor de consumo de cada producto se calcula como salidas del período × pre
 |---|---|---|
 | Backend | Render (Web Service con Docker) | Despliegue del contenedor Spring Boot; variables de entorno para credenciales de base de datos y JWT secret. |
 | Frontend | Vercel | Build automático de la app React/Vite en cada push a `main`; dominio HTTPS gratuito. |
-| Base de datos | Railway (MySQL) | Instancia MySQL gestionada, conectada al backend vía variables de entorno. |
+| Base de datos | Aiven (MySQL 8, plan gratuito) | Instancia MySQL gestionada con conexión cifrada (SSL), conectada al backend vía variables de entorno. |
 
 CORS se habilita en Spring Security solo para el dominio del frontend desplegado en Vercel. Con el free tier de Render, el backend puede tardar unos segundos en responder tras un período de inactividad (cold start).
 
@@ -313,5 +313,7 @@ Los movimientos se insertan directamente en la base con fechas pasadas, porque l
 
 ## Entornos desplegados
 
-- Frontend: [Completar URL de Vercel]
-- Backend: [Completar URL de Render]
+- Frontend: https://tpi-final-utn-stock-iq.vercel.app
+- Backend: https://stockiq-backend-peal.onrender.com (estado en [`/actuator/health`](https://stockiq-backend-peal.onrender.com/actuator/health))
+
+El backend usa el plan gratuito de Render, que lo apaga después de un rato sin uso: el primer ingreso puede tardar hasta un minuto mientras se vuelve a encender. La pantalla de login avisa cuando pasa.
