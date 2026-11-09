@@ -215,12 +215,70 @@ No existen `PUT` ni `DELETE` sobre movimientos (RF-14, RN-07).
 | GET | `/analitica/rotacion/categorias` | ENCARGADO | Rotación por categoría, con los mismos parámetros. | RF-20 |
 | GET | `/analitica/abc` | ENCARGADO | Clasificación ABC con valor, porcentaje acumulado y clase de cada producto. | RF-21 |
 
+**Período de análisis.** `desde` y `hasta` son días de Argentina (`AAAA-MM-DD`), ambos inclusivos. Si no se envían, el período son los últimos `periodo_analisis_dias` días, terminando hoy. La fecha de referencia ("hoy" y el inicio de la ventana de consumo) la calcula el backend con su reloj, en UTC (D-16).
+
+**Cuerpos (JSON).**
+
+- Respuesta de `GET /analitica/reposicion` (lista; primero los productos en alerta, después por nombre):
+
+```json
+[
+  {
+    "producto": { "id": 10, "codigo": "CER-002", "nombre": "Cerveza negra 473 ml (pack x6)", "unidadMedida": "pack", "fraccionable": false },
+    "proveedor": { "id": 3, "nombre": "Cervecería del Sur", "leadTimeDias": 7, "activo": true },
+    "consumoDiario": 2.10,
+    "stockSeguridad": 6.00,
+    "puntoReposicion": 20.70,
+    "stockDisponible": 0.00,
+    "enTransito": 0.00,
+    "alerta": true,
+    "cantidadSugerida": 84
+  }
+]
+```
+
+  `consumoDiario` usa la ventana de `ventana_consumo_dias` (RN-19); `alerta` es `stockDisponible <= puntoReposicion` (RN-23); `cantidadSugerida` sigue RN-24 y se redondea hacia arriba (a entero si el producto no es fraccionable). Los demás valores tienen dos decimales.
+- Respuesta de `GET /analitica/rotacion/productos` (de mayor a menor rotación):
+
+```
+{ "desde": "2026-08-05", "hasta": "2026-11-02", "productos": [
+  { "producto": { id, codigo, nombre, unidadMedida, fraccionable }, "categoria": { id, nombre, activo },
+    "salidas": 540.00, "stockInicial": 180.00, "stockFinal": 220.00, "stockPromedio": 200.00, "rotacion": 2.70 } ] }
+```
+
+- Respuesta de `GET /analitica/rotacion/categorias`:
+
+```
+{ "desde": "...", "hasta": "...", "categorias": [
+  { "categoria": { id, nombre, activo }, "productos": 3, "salidas": 980.00, "stockPromedio": 410.00, "rotacion": 2.39 } ] }
+```
+
+- Respuesta de `GET /analitica/abc` (de mayor a menor valor de consumo):
+
+```
+{ "desde": "...", "hasta": "...", "valorTotal": 34500000.00,
+  "productos": [ { "producto": { ... }, "categoria": { ... }, "cantidadSalidas": 540.00, "precioReferencia": 18500.00,
+                   "valorConsumo": 9990000.00, "porcentaje": 28.96, "porcentajeAcumulado": 28.96, "clase": "A" } ],
+  "resumen": [ { "clase": "A", "productos": 6, "valorConsumo": 30000000.00, "porcentajeValor": 86.96 },
+               { "clase": "B", ... }, { "clase": "C", ... } ] }
+```
+
+  `porcentaje` es la participación del producto en el valor total y `porcentajeAcumulado` incluye al producto y a los anteriores del ranking; la clase se decide con el acumulado previo (D-12). `resumen` siempre trae las tres clases.
+
+
 ## 9. Parámetros
 
 | Método | Ruta | Rol | Descripción | Req. |
 |---|---|---|---|---|
 | GET | `/parametros` | ENCARGADO | Lista los parámetros con su valor y descripción. | RF-22 |
 | PUT | `/parametros/{clave}` | ENCARGADO | Modifica el valor de un parámetro, validado según RN-37. | RF-22 |
+
+**Cuerpos (JSON).**
+
+- Respuesta de `GET /parametros`: `[{ clave, valor, descripcion }]`, ordenada por clave.
+- Pedido de `PUT /parametros/{clave}`: `{ valor }`. Respuesta: `{ clave, valor, descripcion }` con el valor normalizado (por ejemplo, `"75,5"` se guarda como `"75.5"`).
+- Errores: `PARAMETRO_INVALIDO` (400) si el valor no cumple RN-37; `CORTES_ABC_INVALIDOS` (400) si `corte_abc_a` quedaría mayor o igual que `corte_abc_b`; 404 si la clave no existe.
+
 
 ## 10. Dashboard
 
@@ -229,6 +287,20 @@ No existen `PUT` ni `DELETE` sobre movimientos (RF-14, RN-07).
 | GET | `/dashboard/analitica` | ENCARGADO | Alertas de reposición, resumen ABC (cantidad de productos y valor por clase) y rotación por categoría. | RF-23 |
 | GET | `/dashboard/stock` | Todos | Stock por depósito y transferencias pendientes. | RF-24 |
 | GET | `/dashboard/evolucion` | ENCARGADO | Cantidades de entradas, salidas y transferencias agrupadas por `DIA`, `SEMANA` o `MES`, entre `desde` y `hasta`. | RF-25 |
+
+**Cuerpos (JSON).**
+
+- Respuesta de `GET /dashboard/analitica`: `{ desde, hasta, alertas, valorConsumoTotal, resumenAbc, rotacionCategorias }`. `alertas` tiene el formato de `/analitica/reposicion` (solo los productos en alerta), `resumenAbc` el de `resumen` de `/analitica/abc` y `rotacionCategorias` el de `categorias` de `/analitica/rotacion/categorias`, todos sobre el período de análisis.
+- Respuesta de `GET /dashboard/stock`: `{ stock, pendientes }`, con el formato de `GET /stock` y de `GET /movimientos/transferencias/pendientes`.
+- Respuesta de `GET /dashboard/evolucion` (parámetros opcionales `desde`, `hasta` y `agrupacion`; por defecto, el período de análisis agrupado por `SEMANA`):
+
+```
+{ "desde": "2026-08-05", "hasta": "2026-11-02", "agrupacion": "SEMANA",
+  "puntos": [ { "periodo": "2026-08-03", "entradas": 12, "salidas": 61, "transferencias": 4 } ] }
+```
+
+  Cada punto cuenta **movimientos registrados** (no unidades, porque los productos tienen distintas unidades de medida). `periodo` es el primer día del intervalo: el lunes en `SEMANA` y el día 1 en `MES`. Se incluyen los intervalos sin movimientos, con ceros. Si el rango tiene más de 400 puntos para la agrupación elegida, responde 400 con `RANGO_DEMASIADO_GRANDE`.
+
 
 ## 11. Respuestas de error
 
