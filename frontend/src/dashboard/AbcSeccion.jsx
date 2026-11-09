@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { formatearCantidad, formatearPrecio } from '../catalogo/productos/decimales.js';
+import ParetoGrafico from './ParetoGrafico.jsx';
 import { COLOR_CLASE, GRILLA, TINTA, TINTA_CLASE, TINTA_SUAVE } from './colores.js';
 
 const CANTIDAD_EN_GRAFICO = 10;
@@ -198,6 +199,8 @@ export default function AbcSeccion({ abc }) {
                 </table>
               </div>
             )}
+
+            <ParetoGrafico productos={abc.productos} />
           </>
         )}
       </div>
