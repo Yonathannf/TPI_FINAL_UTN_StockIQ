@@ -4,6 +4,7 @@ import { mensajeDeError } from '../shared/api/cliente.js';
 import { formatearCantidad } from '../catalogo/productos/decimales.js';
 import AbcSeccion from './AbcSeccion.jsx';
 import BarrasHorizontales from './BarrasHorizontales.jsx';
+import EvolucionSeccion from './EvolucionSeccion.jsx';
 import { COLOR_DEPOSITO, COLOR_ROTACION } from './colores.js';
 import { dashboardApi } from './dashboardApi.js';
 import './dashboard.css';
@@ -179,6 +180,8 @@ export default function DashboardPage() {
               </table>
             </div>
           </section>
+
+          <EvolucionSeccion desde={analitica.desde} hasta={analitica.hasta} />
 
           <AbcSeccion abc={abc} />
 

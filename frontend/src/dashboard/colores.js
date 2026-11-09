@@ -15,3 +15,6 @@ export const GRILLA = '#e4e8ef';
 /** Gráficos de una sola serie: un matiz por medida, tomados de la paleta categórica de referencia. */
 export const COLOR_ROTACION = '#eb6834'; // naranja (slot 2)
 export const COLOR_DEPOSITO = '#6250d6'; // violeta (slot 7)
+
+/** Series de la evolución de movimientos: los tres primeros matices de la paleta categórica de referencia. */
+export const COLOR_MOVIMIENTO = { entradas: '#2a78d6', salidas: '#eb6834', transferencias: '#1baf7a' };

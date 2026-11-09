@@ -199,3 +199,27 @@
   display: block;
   margin-top: 0.15rem;
 }
+
+/* ---------- Evolución ---------- */
+.herramientas--plana {
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.leyenda--arriba {
+  margin: 0 0 0.75rem;
+}
+
+/* Muestra de línea para la leyenda y el tooltip (la identidad la da el color, el texto va en tinta normal) */
+.linea-clave {
+  display: inline-block;
+  width: 1.1rem;
+  height: 3px;
+  margin-right: 0.45rem;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.leyenda .linea-clave {
+  margin-right: 0;
+}
