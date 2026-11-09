@@ -1,8 +1,9 @@
-# Producción (Render + MySQL en Railway). Todo llega por variables de entorno y
+# Producción (Render + MySQL en Aiven). Todo llega por variables de entorno y
 # no hay valores por defecto a propósito: si falta alguna, el backend no arranca.
 #
 # DB_URL debe estar en formato JDBC, por ejemplo:
-#   jdbc:mysql://<host>:<puerto>/<base>?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&useUnicode=true&characterEncoding=utf8
+#   jdbc:mysql://<host>:<puerto>/<base>?sslMode=REQUIRED&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true&useUnicode=true&characterEncoding=utf8
+# (Aiven solo acepta conexiones cifradas: sin sslMode=REQUIRED el backend no se conecta)
 spring:
   datasource:
     url: ${DB_URL}
