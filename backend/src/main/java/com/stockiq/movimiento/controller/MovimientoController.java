@@ -29,8 +29,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * RF-09 a RF-15, RF-24. Registrar y consultar: cualquier usuario autenticado (RN-34); confirmar y cancelar
- * transferencias: solo ENCARGADO (la regla está en SecurityConfig). El usuario responsable sale del token.
+ * RF-09 a RF-15, RF-24. Registrar, consultar, confirmar y cancelar: cualquier usuario autenticado (RF-12).
+ * Queda registrado quién resolvió cada transferencia y cuándo (RN-14). El usuario responsable sale del token.
  */
 @RestController
 @RequestMapping("/movimientos")
