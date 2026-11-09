@@ -167,15 +167,26 @@ class MovimientoIntegrationTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void operario_registraMovimientosPeroNoResuelveTransferencias() throws Exception {
+    void operario_registraYResuelveTransferencias_RF12() throws Exception {
         entrada(tokenOperario, origen, "10");
-        long id = json(enviar(post("/movimientos/transferencias"), tokenOperario, Map.of(
+        long aConfirmar = json(enviar(post("/movimientos/transferencias"), tokenOperario, Map.of(
                 "productoId", producto.getId(), "depositoOrigenId", origen.getId(),
                 "depositoDestinoId", destino.getId(), "cantidad", 2)).andExpect(status().isCreated()))
                 .get("id").asLong();
+        long aCancelar = json(enviar(post("/movimientos/transferencias"), tokenOperario, Map.of(
+                "productoId", producto.getId(), "depositoOrigenId", origen.getId(),
+                "depositoDestinoId", destino.getId(), "cantidad", 3)).andExpect(status().isCreated()))
+                .get("id").asLong();
 
-        enviar(patch("/movimientos/" + id + "/confirmar"), tokenOperario, null).andExpect(status().isForbidden());
-        enviar(patch("/movimientos/" + id + "/cancelar"), tokenOperario, null).andExpect(status().isForbidden());
+        // RF-12: el operario puede confirmar y cancelar, y queda registrado como responsable (RN-14)
+        enviar(patch("/movimientos/" + aConfirmar + "/confirmar"), tokenOperario, null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoTransferencia").value("CONFIRMADA"))
+                .andExpect(jsonPath("$.usuarioResolucion.id").value(operario.getId()));
+        enviar(patch("/movimientos/" + aCancelar + "/cancelar"), tokenOperario, null)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estadoTransferencia").value("CANCELADA"));
+
         mockMvc.perform(get("/stock").header("Authorization", bearer(tokenOperario))).andExpect(status().isOk());
         mockMvc.perform(get("/movimientos")).andExpect(status().isUnauthorized());
     }

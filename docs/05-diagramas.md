@@ -197,7 +197,7 @@ flowchart LR
         SEC --> CTRL --> SRV --> REP
     end
 
-    DB[(MySQL 8<br/>Railway)]
+    DB[(MySQL 8<br/>Aiven)]
 
     FE -- "HTTPS / REST + JWT" --> SEC
     REP -- JDBC --> DB
