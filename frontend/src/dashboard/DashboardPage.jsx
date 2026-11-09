@@ -4,6 +4,7 @@ import { mensajeDeError } from '../shared/api/cliente.js';
 import { formatearCantidad } from '../catalogo/productos/decimales.js';
 import AlertasSeccion from './AlertasSeccion.jsx';
 import AbcSeccion from './AbcSeccion.jsx';
+import BajaRotacionSeccion from './BajaRotacionSeccion.jsx';
 import BarrasHorizontales from './BarrasHorizontales.jsx';
 import EvolucionSeccion from './EvolucionSeccion.jsx';
 import { COLOR_DEPOSITO, COLOR_ROTACION } from './colores.js';
@@ -137,7 +138,7 @@ export default function DashboardPage() {
           <div className="dashboard__duo">
             <BarrasHorizontales
               titulo="Rotación por categoría"
-              nota="Veces que rota el stock en el período: salidas ÷ stock promedio."
+              nota="Veces que rota el stock en el período: salidas ÷ stock promedio. El stock promedio es el promedio entre el stock al inicio y al final del período, no el de hoy."
               datos={[...analitica.rotacionCategorias]
                 .sort((a, b) => b.rotacion - a.rotacion)
                 .map((c) => ({
@@ -171,6 +172,8 @@ export default function DashboardPage() {
               vacio="Todavía no hay stock en ningún depósito."
             />
           </div>
+
+          <BajaRotacionSeccion abc={abc} stock={stock} />
         </>
       )}
     </div>

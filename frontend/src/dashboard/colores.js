@@ -18,3 +18,6 @@ export const COLOR_DEPOSITO = '#6250d6'; // violeta (slot 7)
 
 /** Series de la evolución de movimientos: los tres primeros matices de la paleta categórica de referencia. */
 export const COLOR_MOVIMIENTO = { entradas: '#2a78d6', salidas: '#eb6834', transferencias: '#1baf7a' };
+
+/** Capital inmovilizado: un solo matiz (magenta, validado con el validador de paletas). */
+export const COLOR_CAPITAL = '#c9356b';

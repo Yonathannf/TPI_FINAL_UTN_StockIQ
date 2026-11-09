@@ -8,6 +8,9 @@ export const dashboardApi = {
   /** ENCARGADO. Clasificación ABC del período de análisis: { desde, hasta, valorTotal, productos, resumen }. */
   abc: async () => (await cliente.get('/analitica/abc')).data,
 
+  /** ENCARGADO. Rotación por producto del período de análisis: { desde, hasta, productos }. */
+  rotacionProductos: async () => (await cliente.get('/analitica/rotacion/productos')).data,
+
   /** Todos los roles. { stock, pendientes }: mismo formato que GET /stock y que las transferencias pendientes. */
   stock: async () => (await cliente.get('/dashboard/stock')).data,
 
