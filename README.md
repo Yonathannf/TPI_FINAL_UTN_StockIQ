@@ -300,6 +300,17 @@ mvn test
 
 Los tests de integración usan MySQL real con Testcontainers: corren si Docker está abierto y, si no, se saltean solos.
 
+### Datos de demostración
+
+Para ver la rotación, el ABC y las alertas de reposición con números realistas, el backend puede cargar un catálogo de ejemplo (15 productos, 7 proveedores y 3 depósitos) con 120 días de movimientos: compras, ventas, roturas y transferencias confirmadas, canceladas y pendientes. La carga se activa sumando el perfil `demo` y **solo corre si la base todavía no tiene ningún movimiento**, así que volver a arrancar con el perfil no duplica nada.
+
+- En Docker: en `docker-compose.yml`, cambiar `SPRING_PROFILES_ACTIVE: dev` por `SPRING_PROFILES_ACTIVE: dev,demo` y levantar con `docker compose up -d --build`.
+- En Render: cambiar la variable `SPRING_PROFILES_ACTIVE` a `prod,demo`. Después de la carga se puede dejar así o volver a `prod`.
+
+Además del encargado inicial, crea dos operarios para probar los permisos: **lgomez** y **mperez**, con la contraseña **demo1234**.
+
+Los movimientos se insertan directamente en la base con fechas pasadas, porque la API siempre asigna la fecha actual (RN-41). La simulación respeta las reglas de negocio: nunca deja stock negativo, las transferencias descuentan del origen al crearse y suman al destino al confirmarse, y los productos no fraccionables se mueven en cantidades enteras. Tres productos quedan a propósito en alerta de reposición.
+
 ## Entornos desplegados
 
 - Frontend: [Completar URL de Vercel]
