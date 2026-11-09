@@ -39,12 +39,27 @@ function rotuloCompleto(periodo, agrupacion) {
 
 const formatoEntero = new Intl.NumberFormat('es-AR');
 
-function TooltipEvolucion({ active, payload, agrupacion }) {
+/** ¿El último período llega más allá de `hasta`? Entonces todavía está en curso y su total es parcial. */
+function ultimoEnCurso(puntos, agrupacion, hasta) {
+  if (!puntos.length || agrupacion === 'DIA') return false;
+  const inicio = aFecha(puntos[puntos.length - 1].periodo);
+  const fin = new Date(inicio);
+  if (agrupacion === 'SEMANA') fin.setUTCDate(fin.getUTCDate() + 6);
+  else {
+    fin.setUTCMonth(fin.getUTCMonth() + 1);
+    fin.setUTCDate(0);
+  }
+  return fin > aFecha(hasta);
+}
+
+function TooltipEvolucion({ active, payload, agrupacion, enCurso, ultimoPeriodo }) {
   if (!active || !payload?.length) return null;
   const punto = payload[0].payload;
+  const parcial = enCurso && punto.periodo === ultimoPeriodo;
   return (
     <div className="grafico__tooltip">
       <strong>{rotuloCompleto(punto.periodo, agrupacion)}</strong>
+      {parcial && <div className="campo__ayuda">Período en curso: el total todavía puede crecer.</div>}
       <dl>
         {SERIES.map((s) => (
           <FilaSerie key={s.clave} serie={s} valor={punto[s.clave]} />
@@ -104,6 +119,20 @@ export default function EvolucionSeccion({ desde: desdeInicial, hasta: hastaInic
     [puntos]
   );
   const ultimo = puntos.length - 1;
+  const enCurso = ultimoEnCurso(puntos, agrupacion, hasta);
+  // Si el último período está en curso se dibuja aparte, punteado, para que no parezca una caída real
+  const datosGrafico = useMemo(
+    () =>
+      puntos.map((p, i) => {
+        const fila = { ...p };
+        for (const { clave } of SERIES) {
+          fila[`${clave}_c`] = enCurso && i === puntos.length - 1 ? null : p[clave];
+          fila[`${clave}_p`] = enCurso && i >= puntos.length - 2 ? p[clave] : null;
+        }
+        return fila;
+      }),
+    [puntos, enCurso]
+  );
 
   return (
     <section className="dashboard__seccion" aria-labelledby="titulo-evolucion">
@@ -163,6 +192,12 @@ export default function EvolucionSeccion({ desde: desdeInicial, hasta: hastaInic
               ))}
             </ul>
 
+            {enCurso && (
+              <p className="campo__ayuda">
+                El último período (línea punteada) todavía está en curso: su total es parcial.
+              </p>
+            )}
+
             {!verTabla && (
               <div
                 role="img"
@@ -170,7 +205,7 @@ export default function EvolucionSeccion({ desde: desdeInicial, hasta: hastaInic
                 style={{ opacity: cargando ? 0.5 : 1 }}
               >
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={puntos} margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
+                  <LineChart data={datosGrafico} margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
                     <CartesianGrid vertical={false} stroke={GRILLA} strokeWidth={1} />
                     <XAxis
                       dataKey="periodo"
@@ -188,14 +223,20 @@ export default function EvolucionSeccion({ desde: desdeInicial, hasta: hastaInic
                       tick={{ fill: TINTA_SUAVE, fontSize: 12 }}
                     />
                     <Tooltip
-                      content={<TooltipEvolucion agrupacion={agrupacion} />}
+                      content={
+                        <TooltipEvolucion
+                          agrupacion={agrupacion}
+                          enCurso={enCurso}
+                          ultimoPeriodo={puntos[ultimo]?.periodo}
+                        />
+                      }
                       cursor={{ stroke: TINTA_SUAVE, strokeWidth: 1 }}
                     />
                     {SERIES.map((s) => (
                       <Line
                         key={s.clave}
                         type="linear"
-                        dataKey={s.clave}
+                        dataKey={`${s.clave}_c`}
                         stroke={COLOR_MOVIMIENTO[s.clave]}
                         strokeWidth={2}
                         strokeLinecap="round"
@@ -203,7 +244,7 @@ export default function EvolucionSeccion({ desde: desdeInicial, hasta: hastaInic
                         isAnimationActive={false}
                         // Punto final con aro del color de la superficie, para que se lea donde las líneas se cruzan
                         dot={({ cx, cy, index, key }) =>
-                          index === ultimo ? (
+                          index === ultimo && !enCurso ? (
                             <circle
                               key={key}
                               cx={cx}
@@ -220,6 +261,20 @@ export default function EvolucionSeccion({ desde: desdeInicial, hasta: hastaInic
                         activeDot={{ r: 4, stroke: '#ffffff', strokeWidth: 2, fill: COLOR_MOVIMIENTO[s.clave] }}
                       />
                     ))}
+                    {enCurso &&
+                      SERIES.map((s) => (
+                        <Line
+                          key={`${s.clave}-parcial`}
+                          type="linear"
+                          dataKey={`${s.clave}_p`}
+                          stroke={COLOR_MOVIMIENTO[s.clave]}
+                          strokeWidth={2}
+                          strokeDasharray="4 4"
+                          isAnimationActive={false}
+                          dot={false}
+                          activeDot={{ r: 4, stroke: '#ffffff', strokeWidth: 2, fill: COLOR_MOVIMIENTO[s.clave] }}
+                        />
+                      ))}
                   </LineChart>
                 </ResponsiveContainer>
               </div>
