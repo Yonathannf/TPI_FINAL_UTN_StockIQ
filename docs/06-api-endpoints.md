@@ -128,6 +128,54 @@ En el pedido, la categoría y el proveedor se indican por id (`categoriaId`, `pr
 
 No existen `PUT` ni `DELETE` sobre movimientos (RF-14, RN-07).
 
+**Cuerpos (JSON).**
+
+- Pedido de `POST /movimientos/entradas`: `{ productoId, depositoDestinoId, cantidad, motivo? }`.
+- Pedido de `POST /movimientos/salidas`: `{ productoId, depositoOrigenId, cantidad, motivo }`.
+- Pedido de `POST /movimientos/transferencias`: `{ productoId, depositoOrigenId, depositoDestinoId, cantidad, motivo? }`.
+- `PATCH /movimientos/{id}/confirmar` y `PATCH /movimientos/{id}/cancelar` no llevan cuerpo.
+- Respuesta de un movimiento (en el registro, el detalle, la confirmación, la cancelación, las pendientes y cada elemento del historial):
+
+```json
+{
+  "id": 15,
+  "tipo": "TRANSFERENCIA",
+  "producto": { "id": 10, "codigo": "BEB-001", "nombre": "Agua mineral 2 L", "unidadMedida": "un" },
+  "cantidad": 24,
+  "fecha": "2026-10-22T21:40:00Z",
+  "motivo": null,
+  "usuario": { "id": 1, "nombre": "Jennifer", "apellido": "Franco" },
+  "depositoOrigen": { "id": 1, "nombre": "Central" },
+  "depositoDestino": { "id": 2, "nombre": "Sucursal Norte" },
+  "estadoTransferencia": "PENDIENTE",
+  "fechaResolucion": null,
+  "usuarioResolucion": null
+}
+```
+
+  `depositoOrigen` es `null` en las entradas y `depositoDestino` es `null` en las salidas (RN-03, RN-04). `estadoTransferencia`, `fechaResolucion` y `usuarioResolucion` son `null` salvo en las transferencias resueltas (RN-14).
+- Respuesta de `GET /movimientos` (historial paginado), ordenado del más reciente al más antiguo:
+
+```
+{ "contenido": [ ...movimientos... ], "pagina": 0, "tamanio": 20, "totalElementos": 45, "totalPaginas": 3 }
+```
+
+- Respuesta de `GET /movimientos/transferencias/pendientes`: lista de movimientos, del más antiguo al más reciente.
+
+**Fechas (RN-41).** Las fechas de las respuestas se envían en UTC con el sufijo `Z` (por ejemplo `2026-10-22T21:40:00Z`); el frontend las muestra en hora de Argentina. Los filtros `desde` y `hasta` del historial son días (`AAAA-MM-DD`) en hora de Argentina y ambos son inclusivos: el backend los convierte a UTC (desde las 00:00 del día `desde` hasta las 23:59:59 del día `hasta`).
+
+**Códigos de error propios.**
+
+| Código | HTTP | Cuándo |
+|---|---|---|
+| `STOCK_INSUFICIENTE` | 409 | La salida o la transferencia dejaría negativo el stock del depósito origen (RN-06). |
+| `TRANSFERENCIA_NO_PENDIENTE` | 409 | Se intenta confirmar o cancelar una transferencia ya resuelta (RN-13). |
+| `PRODUCTO_INACTIVO` / `DEPOSITO_INACTIVO` | 409 | Movimiento sobre un producto o un depósito inactivo (RN-08). |
+| `DEPOSITOS_IGUALES` | 400 | Transferencia con el mismo depósito de origen y destino (RN-05). |
+| `MOTIVO_OBLIGATORIO` | 400 | Salida sin motivo (RN-09). |
+| `CANTIDAD_NO_ENTERA` | 400 | Cantidad con decimales para un producto no fraccionable (RN-44). |
+
+
 ## 7. Stock
 
 | Método | Ruta | Rol | Descripción | Req. |
@@ -135,6 +183,28 @@ No existen `PUT` ni `DELETE` sobre movimientos (RF-14, RN-07).
 | GET | `/stock` | Todos | Stock por producto y depósito; filtros `productoId` y `depositoId`. | RF-16 |
 | GET | `/stock/productos/{id}` | Todos | Stock de un producto: por depósito, total disponible y en tránsito. | RF-16, RF-17 |
 | GET | `/stock/transito` | Todos | Stock en tránsito por producto. | RF-17 |
+
+**Cuerpos (JSON).**
+
+- Respuesta de `GET /stock`: una fila por **producto activo**, aunque no tenga stock, ordenada por nombre:
+
+```json
+[
+  {
+    "producto": { "id": 10, "codigo": "BEB-001", "nombre": "Agua mineral 2 L", "unidadMedida": "un", "fraccionable": false },
+    "porDeposito": [
+      { "deposito": { "id": 1, "nombre": "Central", "activo": true }, "cantidad": 120 },
+      { "deposito": { "id": 2, "nombre": "Sucursal Norte", "activo": true }, "cantidad": 36 }
+    ],
+    "totalDisponible": 156,
+    "enTransito": 24
+  }
+]
+```
+
+  `porDeposito` incluye solo los depósitos donde el stock es distinto de cero (RN-16). `totalDisponible` suma solo los depósitos activos (RN-18) y `enTransito` es la suma de las transferencias pendientes del producto (RN-17). Con `productoId` devuelve solo ese producto; con `depositoId`, `porDeposito` incluye solo ese depósito.
+- Respuesta de `GET /stock/productos/{id}`: el mismo objeto, para un solo producto (activo o no).
+- Respuesta de `GET /stock/transito`: `[{ producto: { id, codigo, nombre, unidadMedida }, enTransito }]`, solo los productos con stock en tránsito.
 
 ## 8. Capa analítica
 

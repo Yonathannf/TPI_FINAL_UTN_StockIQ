@@ -1,0 +1,79 @@
+/* Stock: métricas, tabla por depósito y transferencias pendientes. */
+
+.metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.metrica {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.25rem;
+}
+
+.metrica .icono-cuadro {
+  margin-bottom: 0.5rem;
+}
+
+.metrica__valor {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.metrica__etiqueta {
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}
+
+.filtro.filtro--casilla {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.7rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filtro.filtro--casilla input {
+  min-width: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  padding: 0;
+  accent-color: var(--azul);
+}
+
+.tabla--stock th,
+.tabla--stock td {
+  white-space: nowrap;
+}
+
+.stock__total {
+  font-weight: 700;
+}
+
+.stock__cero {
+  color: var(--texto-suave);
+}
+
+.stock__pendientes {
+  margin-top: 2.5rem;
+}
+
+.stock__pendientes-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+.stock__enlace {
+  color: var(--azul);
+  font-weight: 600;
+  font-size: 0.9rem;
+}

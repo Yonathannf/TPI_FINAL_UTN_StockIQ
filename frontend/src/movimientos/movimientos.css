@@ -1,0 +1,105 @@
+/* Movimientos: acciones de registro, tipos, recorrido y paginación. */
+
+.mov-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mov-tipo {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.mov-tipo .insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.mov-fecha {
+  white-space: nowrap;
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}
+
+.recorrido {
+  white-space: nowrap;
+}
+
+/* Tipos y estados */
+.insignia--entrada {
+  background: var(--exito-suave);
+  color: var(--exito);
+}
+
+.insignia--salida {
+  background: var(--salida-suave);
+  color: var(--salida);
+}
+
+.insignia--transferencia {
+  background: var(--azul-suave);
+  color: var(--azul);
+}
+
+.insignia--pendiente {
+  background: var(--alerta-suave);
+  color: var(--alerta);
+}
+
+.insignia--confirmada {
+  background: var(--exito-suave);
+  color: var(--exito);
+}
+
+.insignia--cancelada {
+  background: var(--fondo);
+  color: var(--texto-suave);
+  border: 1px solid var(--borde);
+}
+
+/* Filtros del historial: pasan a la línea siguiente si no entran */
+.herramientas--envolver {
+  flex-wrap: wrap;
+}
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.paginacion__estado {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+/* Formulario */
+.form-mov__fila {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0 1rem;
+}
+
+.form-mov__ayuda {
+  display: block;
+  margin: 0 0 1rem;
+}
+
+@media (max-width: 56rem) {
+  .mov-acciones {
+    width: 100%;
+  }
+
+  .mov-acciones .boton {
+    flex: 1;
+  }
+
+  .paginacion {
+    flex-direction: column;
+  }
+}

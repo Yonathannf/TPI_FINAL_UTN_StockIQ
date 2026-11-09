@@ -9,12 +9,16 @@ import { SECCIONES } from './shared/layout/navegacion.js';
 import CatalogoPage from './catalogo/CatalogoPage.jsx';
 import DepositosPage from './depositos/DepositosPage.jsx';
 import UsuariosPage from './usuarios/UsuariosPage.jsx';
+import MovimientosPage from './movimientos/MovimientosPage.jsx';
+import StockPage from './stock/StockPage.jsx';
 
 /** Pantallas ya desarrolladas, por ruta. Las que faltan muestran "en desarrollo". */
 const PANTALLAS = {
   '/catalogo': <CatalogoPage />,
   '/depositos': <DepositosPage />,
   '/usuarios': <UsuariosPage />,
+  '/movimientos': <MovimientosPage />,
+  '/stock': <StockPage />,
 };
 
 export default function App() {
