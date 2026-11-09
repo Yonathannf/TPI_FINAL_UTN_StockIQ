@@ -11,6 +11,7 @@ import DepositosPage from './depositos/DepositosPage.jsx';
 import UsuariosPage from './usuarios/UsuariosPage.jsx';
 import MovimientosPage from './movimientos/MovimientosPage.jsx';
 import StockPage from './stock/StockPage.jsx';
+import ConfiguracionPage from './configuracion/ConfiguracionPage.jsx';
 
 /** Pantallas ya desarrolladas, por ruta. Las que faltan muestran "en desarrollo". */
 const PANTALLAS = {
@@ -19,6 +20,7 @@ const PANTALLAS = {
   '/usuarios': <UsuariosPage />,
   '/movimientos': <MovimientosPage />,
   '/stock': <StockPage />,
+  '/configuracion': <ConfiguracionPage />,
 };
 
 export default function App() {

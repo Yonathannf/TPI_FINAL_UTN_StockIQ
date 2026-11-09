@@ -1,0 +1,46 @@
+/* Pantalla de configuración de parámetros. */
+
+.parametros__grupo {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.parametros__grupo h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.parametros__bajada {
+  margin: 0.25rem 0 1rem;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.parametros__campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 1.5rem;
+}
+
+.parametros__entrada {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.parametros__entrada input {
+  flex: 1;
+  min-width: 0;
+}
+
+.parametros__unidad {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.parametros__pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
