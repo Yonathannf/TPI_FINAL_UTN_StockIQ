@@ -2,8 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, ArrowLeftRight, DollarSign, Medal, RefreshCw } from 'lucide-react';
 import { mensajeDeError } from '../shared/api/cliente.js';
 import { formatearCantidad } from '../catalogo/productos/decimales.js';
+import AlertasSeccion from './AlertasSeccion.jsx';
 import AbcSeccion from './AbcSeccion.jsx';
+import BajaRotacionSeccion from './BajaRotacionSeccion.jsx';
 import BarrasHorizontales from './BarrasHorizontales.jsx';
+import EvolucionSeccion from './EvolucionSeccion.jsx';
 import { COLOR_DEPOSITO, COLOR_ROTACION } from './colores.js';
 import { dashboardApi } from './dashboardApi.js';
 import './dashboard.css';
@@ -126,66 +129,16 @@ export default function DashboardPage() {
             />
           </div>
 
-          <section className="dashboard__seccion">
-            <div className="dashboard__titulo">
-              <h2>Alertas de reposición</h2>
-              <span className="dashboard__nota">
-                Stock disponible igual o menor al punto de reposición. Primero lo más urgente.
-              </span>
-            </div>
-            <div className="tarjeta tabla__contenedor">
-              <table className="tabla">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th>Proveedor</th>
-                    <th className="tabla__numero">Consumo diario</th>
-                    <th className="tabla__numero">Disponible</th>
-                    <th className="tabla__numero">En tránsito</th>
-                    <th className="tabla__numero">Punto de reposición</th>
-                    <th className="tabla__numero">Sugerido</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analitica.alertas.length === 0 && (
-                    <tr>
-                      <td colSpan={7} className="tabla__vacio">
-                        No hay productos en alerta: todo el stock está por encima de su punto de reposición.
-                      </td>
-                    </tr>
-                  )}
-                  {analitica.alertas.map((a) => (
-                    <tr key={a.producto.id} className="fila--alerta">
-                      <td>
-                        <strong>{a.producto.nombre}</strong>
-                        <div className="campo__ayuda">{a.producto.codigo}</div>
-                      </td>
-                      <td>
-                        {a.proveedor.nombre}
-                        <div className="campo__ayuda">Lead time: {a.proveedor.leadTimeDias} días</div>
-                      </td>
-                      <td className="tabla__numero">{formatearCantidad(a.consumoDiario)}</td>
-                      <td className="tabla__numero">
-                        {formatearCantidad(a.stockDisponible)} {a.producto.unidadMedida}
-                      </td>
-                      <td className="tabla__numero">{a.enTransito > 0 ? formatearCantidad(a.enTransito) : '—'}</td>
-                      <td className="tabla__numero">{formatearCantidad(a.puntoReposicion)}</td>
-                      <td className="tabla__numero dashboard__sugerida">
-                        {formatearCantidad(a.cantidadSugerida)} {a.producto.unidadMedida}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <AlertasSeccion alertas={analitica.alertas} />
+
+          <EvolucionSeccion desde={analitica.desde} hasta={analitica.hasta} />
 
           <AbcSeccion abc={abc} />
 
           <div className="dashboard__duo">
             <BarrasHorizontales
               titulo="Rotación por categoría"
-              nota="Veces que rota el stock en el período: salidas ÷ stock promedio."
+              nota="Veces que rota el stock en el período: salidas ÷ stock promedio. El stock promedio es el promedio entre el stock al inicio y al final del período, no el de hoy."
               datos={[...analitica.rotacionCategorias]
                 .sort((a, b) => b.rotacion - a.rotacion)
                 .map((c) => ({
@@ -219,6 +172,8 @@ export default function DashboardPage() {
               vacio="Todavía no hay stock en ningún depósito."
             />
           </div>
+
+          <BajaRotacionSeccion abc={abc} stock={stock} />
         </>
       )}
     </div>
