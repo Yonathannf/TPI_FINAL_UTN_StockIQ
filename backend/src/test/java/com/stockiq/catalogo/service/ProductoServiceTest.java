@@ -30,6 +30,7 @@ import com.stockiq.catalogo.repository.CategoriaRepository;
 import com.stockiq.catalogo.repository.ProductoRepository;
 import com.stockiq.catalogo.repository.ProveedorRepository;
 import com.stockiq.common.exception.ConflictException;
+import com.stockiq.common.exception.NotFoundException;
 import com.stockiq.stock.repository.StockConsultaRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -247,5 +248,158 @@ class ProductoServiceTest {
         service.listar(null, null, true, "  CABLE ");
 
         verify(productoRepository).buscar(null, null, true, "%cable%");
+    }
+
+    @Nested
+    @DisplayName("Consulta, reactivación y casos de borde")
+    class ConsultaYBorde {
+
+        @Test
+        void obtenerDevuelveElProducto() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            when(productoRepository.buscarConRelaciones(5L)).thenReturn(Optional.of(existente));
+
+            ProductoResponse res = service.obtener(5L);
+
+            assertThat(res.id()).isEqualTo(5L);
+            assertThat(res.codigo()).isEqualTo("P-5");
+        }
+
+        @Test
+        void obtenerUnProductoInexistenteDa404() {
+            when(productoRepository.buscarConRelaciones(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.obtener(99L))
+                    .isInstanceOf(NotFoundException.class)
+                    .extracting("codigo").isEqualTo("RECURSO_NO_ENCONTRADO");
+        }
+
+        @Test
+        void activaUnProductoInactivo() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            existente.setActivo(false);
+            when(productoRepository.buscarConRelaciones(5L)).thenReturn(Optional.of(existente));
+
+            assertThat(service.activar(5L).activo()).isTrue();
+            assertThat(existente.isActivo()).isTrue();
+        }
+
+        @Test
+        void activarUnProductoInexistenteDa404() {
+            when(productoRepository.buscarConRelaciones(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.activar(99L)).isInstanceOf(NotFoundException.class);
+        }
+
+        @Test
+        void desactivarUnProductoInexistenteDa404() {
+            when(productoRepository.bloquearPorId(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.desactivar(99L)).isInstanceOf(NotFoundException.class);
+        }
+
+        @Test
+        void desactivarUnProductoYaInactivoNoConsultaElStock() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            existente.setActivo(false);
+            when(productoRepository.bloquearPorId(5L)).thenReturn(Optional.of(existente));
+
+            assertThat(service.desactivar(5L).activo()).isFalse();
+            verify(stockConsulta, never()).productoTieneStock(anyLong());
+        }
+
+        @Test
+        void editarUnProductoInexistenteDa404() {
+            when(productoRepository.bloquearPorId(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.editar(99L, request(1L, 2L, true)))
+                    .isInstanceOf(NotFoundException.class);
+        }
+
+        @Test
+        void editarRechazaUnCodigoDuplicado() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            when(productoRepository.bloquearPorId(5L)).thenReturn(Optional.of(existente));
+            when(productoRepository.existsByCodigoIgnoreCaseAndIdNot("P-1", 5L)).thenReturn(true);
+
+            assertThatThrownBy(() -> service.editar(5L, request(1L, 2L, true)))
+                    .isInstanceOf(ConflictException.class)
+                    .extracting("codigo").isEqualTo("CODIGO_DUPLICADO");
+        }
+
+        @Test
+        void editarRechazaUnaCategoriaInexistente() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            when(productoRepository.bloquearPorId(5L)).thenReturn(Optional.of(existente));
+            when(productoRepository.existsByCodigoIgnoreCaseAndIdNot("P-1", 5L)).thenReturn(false);
+            when(categoriaRepository.findById(3L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.editar(5L, request(3L, 2L, true)))
+                    .isInstanceOf(NotFoundException.class);
+        }
+
+        @Test
+        void editarRechazaUnProveedorInactivo() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            when(productoRepository.bloquearPorId(5L)).thenReturn(Optional.of(existente));
+            when(productoRepository.existsByCodigoIgnoreCaseAndIdNot("P-1", 5L)).thenReturn(false);
+            when(proveedorRepository.findById(3L)).thenReturn(Optional.of(proveedor(3L, false)));
+
+            assertThatThrownBy(() -> service.editar(5L, request(1L, 3L, true)))
+                    .isInstanceOf(ConflictException.class)
+                    .extracting("codigo").isEqualTo("PROVEEDOR_INACTIVO");
+        }
+
+        @Test
+        void editarRechazaUnProveedorInexistente() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            when(productoRepository.bloquearPorId(5L)).thenReturn(Optional.of(existente));
+            when(productoRepository.existsByCodigoIgnoreCaseAndIdNot("P-1", 5L)).thenReturn(false);
+            when(proveedorRepository.findById(4L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.editar(5L, request(1L, 4L, true)))
+                    .isInstanceOf(NotFoundException.class);
+        }
+
+        @Test
+        void crearRechazaUnaCategoriaInexistente() {
+            when(productoRepository.existsByCodigoIgnoreCase("P-1")).thenReturn(false);
+            when(categoriaRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.crear(request(1L, 2L, true)))
+                    .isInstanceOf(NotFoundException.class);
+            verify(productoRepository, never()).save(any());
+        }
+
+        @Test
+        void crearRechazaUnProveedorInexistente() {
+            when(productoRepository.existsByCodigoIgnoreCase("P-1")).thenReturn(false);
+            when(categoriaRepository.findById(1L)).thenReturn(Optional.of(categoria(1L, true)));
+            when(proveedorRepository.findById(2L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.crear(request(1L, 2L, true)))
+                    .isInstanceOf(NotFoundException.class);
+            verify(productoRepository, never()).save(any());
+        }
+
+        @Test
+        void listarConUnTextoEnBlancoNoEnviaPatron() {
+            when(productoRepository.buscar(null, null, null, null)).thenReturn(List.of());
+
+            service.listar(null, null, null, "   ");
+
+            verify(productoRepository).buscar(null, null, null, null);
+        }
+
+        @Test
+        void listarDevuelveLosProductosMapeados() {
+            Producto existente = producto(5L, categoria(1L, true), proveedor(2L, true), true);
+            when(productoRepository.buscar(1L, null, null, null)).thenReturn(List.of(existente));
+
+            List<ProductoResponse> res = service.listar(1L, null, null, null);
+
+            assertThat(res).hasSize(1);
+            assertThat(res.get(0).id()).isEqualTo(5L);
+        }
     }
 }
