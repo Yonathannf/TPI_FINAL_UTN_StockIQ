@@ -291,14 +291,22 @@ Al primer arranque se crea el usuario `ENCARGADO` inicial. En desarrollo es **ad
 
 Para correr el backend desde el IDE en lugar de Docker, se levanta solo la base con `docker compose up -d mysql` y se ejecuta `StockiqApplication`: el perfil `dev` ya apunta a `localhost:3306`. El archivo `backend/http/semana-2.http` tiene pedidos de ejemplo para probar la API con la extensión REST Client de VS Code.
 
-Tests y reporte de cobertura (`backend/target/site/jacoco/index.html`), con Java 17 o superior y Maven:
+Tests y reporte de cobertura (`backend/target/site/jacoco/index.html`), con Java 17 o superior, Maven y Docker Desktop abierto:
 
 ```bash
 cd backend
-mvn test
+mvn clean test
 ```
 
-Los tests de integración usan MySQL real con Testcontainers: corren si Docker está abierto y, si no, se saltean solos.
+Los tests de integración usan MySQL real con Testcontainers: corren si Docker Desktop está abierto y, si no, **se saltean sin fallar**, por lo que la cobertura del reporte queda más baja. Antes de medir la cobertura, verificar que el resumen de `mvn test` diga `Skipped: 0`. `clean` borra lo compilado antes, para que no se mezclen clases de versiones anteriores.
+
+Si Docker está abierto y los tests se saltean igual (pasa con versiones recientes de Docker Desktop, cuyo motor exige la API 1.44 o superior), crear en la carpeta del usuario el archivo `.docker-java.properties` con esta línea y volver a correr los tests:
+
+```
+api.version=1.44
+```
+
+En PowerShell: `Set-Content -Path "$env:USERPROFILE\.docker-java.properties" -Value "api.version=1.44"`.
 
 ### Datos de demostración
 
