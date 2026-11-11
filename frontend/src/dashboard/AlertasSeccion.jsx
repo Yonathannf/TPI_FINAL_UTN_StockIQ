@@ -20,17 +20,28 @@ function ComoSeCalculo({ alerta: a, diasCobertura }) {
   const cobertura = diasCobertura != null ? consumo * diasCobertura : null;
   const bruto = cobertura != null ? pr + cobertura - disponible - transito : null;
 
+  // El backend calcula con el consumo completo y lo devuelve redondeado a 2 decimales: la cuenta rehecha acá
+  // con el consumo redondeado puede diferir por centésimas. En ese caso se muestra "≈" y se aclara.
+  const prRehecho = consumo * lead + seguridad;
+  const hayRedondeo = Math.abs(prRehecho - pr) > 0.005;
+
   return (
     <div className="calculo">
       <div className="calculo__paso">
         <h3>1. Punto de reposición</h3>
         <p className="calculo__cuenta">
-          {cant(consumo)} {u}/día × {lead} días de lead time + {cant(seguridad)} de stock de seguridad ={' '}
+          {cant(consumo)} {u}/día × {lead} días de lead time + {cant(seguridad)} de stock de seguridad {hayRedondeo ? '≈' : '='}{' '}
           <strong>
             {cant(pr)} {u}
           </strong>
         </p>
         <p className="campo__ayuda">Es el stock con el que conviene pedir: cubre el consumo mientras llega el pedido.</p>
+        {hayRedondeo && (
+          <p className="campo__ayuda">
+            El consumo diario se muestra redondeado a 2 decimales; el sistema calcula con el valor completo, por eso la
+            cuenta puede diferir por unas centésimas.
+          </p>
+        )}
       </div>
 
       <div className="calculo__paso">
@@ -53,7 +64,7 @@ function ComoSeCalculo({ alerta: a, diasCobertura }) {
           <>
             <p className="calculo__cuenta">
               {cant(pr)} + ({cant(consumo)} × {diasCobertura} días de cobertura) − {cant(disponible)} disponible −{' '}
-              {cant(transito)} en tránsito = {cant(bruto)}
+              {cant(transito)} en tránsito {hayRedondeo ? '≈' : '='} {cant(bruto)}
             </p>
             <p className="calculo__cuenta">
               Se redondea hacia arriba y nunca es menor a 0:{' '}
