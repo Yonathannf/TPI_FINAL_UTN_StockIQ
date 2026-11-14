@@ -13,7 +13,7 @@ Repositorio correspondiente al Trabajo Práctico Final de la Tecnicatura Univers
 - Sofia Raia
 
 ## Entrega final
-- **Video de presentación:** [Ver en YouTube]([https://youtu.be/QdCD1V_JVE4](https://youtu.be/Ifm0Mf5yB18?si=sVbbsPHsfwp2ouHj))
+- **Video de presentación:** [Ver en YouTube](https://youtu.be/Ifm0Mf5yB18)
 - **Informe final (PDF):** [docs/informe-final.pdf](docs/informe-final.pdf)
 - **Sistema publicado:** https://tpi-final-utn-stock-iq.vercel.app
 
